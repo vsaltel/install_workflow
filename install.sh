@@ -1,16 +1,21 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ] && [ "${1}" != "-f" ]
-  then echo "Please run as root or use -f"
-  exit
+DIRPATH=$(dirname ${0})
+
+if [ "$EUID" -eq 0 ]
+then
+    USERHOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+elif [ "${1}" == "-f" ]
+then
+    USERHOME=$HOME
+else
+    echo "Please run as root or use -f"
+    exit
 fi
 
-DIRPATH=$(dirname ${0})
-USERHOME=~username
-
+echo $DIRPATH
+echo $USERHOME
 
 #apt-get install tmux
 #cp $DIRPATH/srcs/tmux.conf $HOME/.tmux.conf
 #cp $DIRPATH/srcs/vimrc $HOME/.vimrc
-echo $USERHOME
-echo ~username

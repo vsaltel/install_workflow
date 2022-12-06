@@ -1,6 +1,7 @@
 #!/bin/bash
 
 DIRPATH=$(dirname ${0})
+LOGFILE="${DIRPATH}/logs"
 
 if [ "$EUID" -eq 0 ]
 then
@@ -13,9 +14,24 @@ else
     exit
 fi
 
-echo $DIRPATH
-echo $USERHOME
+echo "GCC INSTALL"
+apt-get -y install gcc >> $LOGFILE
+echo "MAKE INSTALL"
+apt-get -y install make >> $LOGFILE
+echo "CURL INSTALL"
+apt-get -y install curl >> $LOGFILE
+echo "GIT INSTALL"
+apt-get -y install git >> $LOGFILE
+echo "VIM INSTALL"
+apt-get -y install vim >> $LOGFILE
+echo "TMUX INSTALL"
+apt-get -y install tmux >> $LOGFILE
 
-#apt-get install tmux
-#cp $DIRPATH/srcs/tmux.conf $HOME/.tmux.conf
-#cp $DIRPATH/srcs/vimrc $HOME/.vimrc
+echo "COPY CONFIG FILES"
+cp $DIRPATH/srcs/tmux.conf $USERHOME/.tmux.conf
+cp $DIRPATH/srcs/vimrc $USERHOME/.vimrc
+
+#A retirer si colors s'applique tout seul
+#cp -R $DIRPATH/srcs/vim $USERHOME/.vim
+
+echo "INSTALL VIM PLUGINS"

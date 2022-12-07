@@ -1,4 +1,5 @@
-" vim-bootstrap 2022-10-07 10:40:49
+" vimrc by vsaltel
+" fork of vim-bootstrap
 
 "*****************************************************************************
 "" Vim-Plug core
@@ -49,6 +50,7 @@ Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'editor-bootstrap/vim-bootstrap-updater'
 Plug 'tpope/vim-rhubarb' " required by fugitive to :Gbrowse
+Plug 'ycm-core/YouCompleteMe' " Completion
 Plug 'morhetz/gruvbox'
 
 if isdirectory('/usr/local/opt/fzf')
@@ -142,13 +144,14 @@ let g:session_command_aliases = 1
 "" Visual Settings
 "*****************************************************************************
 syntax on
-
-set background=dark
 set ruler
 set number
 
 let no_buffers_menu=1
+
+" colorscheme
 colorscheme gruvbox
+set background=dark
 
 " Better command line completion 
 set wildmenu
@@ -315,6 +318,10 @@ set autoread
 "*****************************************************************************
 "" Mappings
 "*****************************************************************************
+
+"" Invert default map
+noremap ^ #
+noremap # ^
 
 "" Split
 noremap <Leader>h :<C-u>split<CR>

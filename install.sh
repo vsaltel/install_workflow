@@ -3,12 +3,14 @@
 ## COLORS   ##
 NC='\033[0m' # No Color
 RED='\033[0;31m'
-RED='\033[0;32m'
+GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+PURPLE='\033[1;35m'
 
 ## VARS     ## 
 DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
+PACKAGES="gcc make cmake curl python3 python3-pip git vim vim-gui-common vim-runtime tmux"
 
 ## BEGIN    ##
 if [ "$EUID" -eq 0 ]; then
@@ -37,43 +39,37 @@ else
     exit
 fi
 
-echo "APT UPDATE"
-apt-get -y update >> $LOGFILE
-echo "GCC INSTALL"
-apt-get -y install gcc >> $LOGFILE
-echo "MAKE INSTALL"
-apt-get -y install make >> $LOGFILE
-echo "CMAKE INSTALL"
-apt-get -y install cmake >> $LOGFILE
-echo "CURL INSTALL"
-apt-get -y install curl >> $LOGFILE
-echo "PYTHON3 INSTALL"
-apt-get -y install python3 >> $LOGFILE
-echo "PIP3 INSTALL"
-apt-get -y install python3-pip >> $LOGFILE
-echo "GIT INSTALL"
-apt-get -y install git >> $LOGFILE
-echo "VIM INSTALL"
-apt-get -y install vim >> $LOGFILE
-echo "VIM GUI-COMMON INSTALL"
-apt-get -y install vim-gui-common >> $LOGFILE
-echo "VIM RUNTIME INSTALL"
-apt-get -y install vim-runtime >> $LOGFILE
-echo "TMUX INSTALL"
-apt-get -y install tmux >> $LOGFILE
+echo -e "${GREEN}INSTALLATION START !${NC}"
 
-echo "COPY CONFIG FILES"
+echo -e "${YELLOW}APT UPDATE${NC}"
+apt-get -y update >> $LOGFILE
+if [ $? -ne 0 ]; then
+    echo -e "${RED}UPDATE FAILED${NC}"
+    exit
+fi
+
+echo -e "${YELLOW}APT INSTALL PACKAGES:${NC}"
+for PACK in $PACKAGES; do
+    echo -e "${PURPLE}INSTALL ${PACK}${NC}"
+    apt-get -y install $PACK >> $LOGFILE
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}${PACK} INSTALLATION FAILED${NC}"
+        exit
+    fi
+done
+
+echo -e "${YELLOW}COPY CONFIG FILES${NC}"
 cp $DIRPATH/srcs/tmux.conf $USERHOME/.tmux.conf
 cp $DIRPATH/srcs/vimrc $USERHOME/.vimrc
 
-echo "INSTALL VIM PLUGIN MANAGER"
+echo -e "${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}"
 su ${USERNAME} -c "curl -fLo $USERHOME/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &>> $LOGFILE
 
 echo -e "${YELLOW}INSTALL VIM PLUGINS${NC}"
 su ${USERNAME} -c "vim +'PlugInstall --sync' +quitall" &>> $LOGFILE
 
-echo "INSTALL YOUCOMPLETEME PLUGIN"
+echo -e "${YELLOW}INSTALL YOUCOMPLETEME PLUGIN${NC}"
 su ${USERNAME} -c "python3 $USERHOME/.vim/plugged/YouCompleteMe/install.py" >> $LOGFILE
 
 echo -e "${GREEN}INSTALLATION SUCCESSFULL !${NC}"

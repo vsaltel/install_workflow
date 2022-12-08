@@ -59,6 +59,7 @@ Plug 'Yggdroot/indentLine'
 Plug 'editor-bootstrap/vim-bootstrap-updater'
 Plug 'tpope/vim-rhubarb' " required by fugitive to :Gbrowse
 Plug 'ycm-core/YouCompleteMe' " Completion
+Plug 'alpertuna/vim-header' " Header
 Plug 'morhetz/gruvbox'
 
 if isdirectory('/usr/local/opt/fzf')
@@ -326,6 +327,11 @@ set autoread
 "*****************************************************************************
 "" Mappings
 "*****************************************************************************
+
+"" Header
+let g:header_field_author = "Valentin SALTEL"
+let g:header_field_author_email = "vsaltel@student.42.fr"
+noremap <F1> :AddHeader<CR>
 
 "" Invert default map
 noremap ^ #

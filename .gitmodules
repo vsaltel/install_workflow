@@ -1,3 +1,4 @@
 [submodule "zsh-async"]
 	path = srcs/zsh/third-party/zsh-async
 	url = git@github.com:mafredri/zsh-async.git
+

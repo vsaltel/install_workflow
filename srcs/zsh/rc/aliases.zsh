@@ -1,0 +1,10 @@
+## Aliases      ##
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias l="ls -lakNF --group-directories-first -I '..' -I '.'"
+alias gr="grep -R --color"
+alias f="find -name"
+alias fn="find -type f -name"
+alias fd="find -type d -name"
+alias fp="find -path"

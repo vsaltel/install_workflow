@@ -10,39 +10,43 @@ PURPLE='\033[1;35m'
 ## VARS         ## 
 DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
-PACKAGES="gcc make cmake curl python3 python3-pip git zsh vim vim-gui-common vim-runtime tmux"
+PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux"
 
 ## FUNCTIONS    ##
 command_exists() {
     command -v "$@" >/dev/null 2>&1
 }
 
-## BEGIN        ##
+## START        ##
+
 if [ "$EUID" -eq 0 ]; then
     if [ -n "${SUDO_USER}" ]; then
         DESTUSER=${SUDO_USER}
     elif [ -n "${1}" ]; then
         DESTUSER=${1}
     else
-        echo -e "${RED}Usage :\n\tsudo ${0}\n\tor\n\t${0} [USER]${NC}" | tee -a ${LOGFILE}
+        echo -e "${RED}Usage :\n\tsudo ${0}\n\tor\n\t${0} [USER]${NC}"
         exit
     fi
 
     if [ -n ${DESTUSER} ]; then
         USERHOME=$(getent passwd ${DESTUSER} | cut -d: -f6)
     else
-        echo -e "${RED}User not find${NC}" | tee -a ${LOGFILE}
+        echo -e "${RED}User not find${NC}"
         exit
     fi
 
     if [ -z ${USERHOME} ]; then
-        echo -e "${RED}${DESTUSER} not exist on the system${NC}" | tee -a ${LOGFILE}
+        echo -e "${RED}${DESTUSER} not exist on the system${NC}"
         exit
     fi
 else
-    echo -e "${RED}Please run as root${NC}" | tee -a ${LOGFILE}
+    echo -e "${RED}Please run as root${NC}"
     exit
 fi
+
+touch ${LOGFILE}
+chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
 
 echo -e "${GREEN}INSTALLATION START !${NC}" | tee -a ${LOGFILE}
 
@@ -64,20 +68,20 @@ for PACK in ${PACKAGES}; do
 done
 
 echo -e "${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
-cp -R ${DIRPATH}/srcs/zsh ${USERHOME}/.zsh
-chown -R ${DESTUSER}:${DESTUSER} $USERHOME/.zsh
-ln -s $USERHOME/.zsh/zshrc $USERHOME/.zshrc
-chown ${DESTUSER}:${DESTUSER} $USERHOME/.zshrc
-ln -s $USERHOME/.zsh/zshenv $USERHOME/.zshenv
-chown ${DESTUSER}:${DESTUSER} $USERHOME/.zshenv
+cp ${DIRPATH}/srcs/bashrc ${USERHOME}/.bashrc
+chown ${DESTUSER}:${DESTUSER} $USERHOME/.bashrc
+cp ${DIRPATH}/srcs/bash_aliases ${USERHOME}/.bash_aliases
+chown ${DESTUSER}:${DESTUSER} $USERHOME/.bash_aliases
+cp ${DIRPATH}/srcs/bash_logout ${USERHOME}/.bash_logout
+chown ${DESTUSER}:${DESTUSER} $USERHOME/.bash_logout
 cp ${DIRPATH}/srcs/vimrc ${USERHOME}/.vimrc
 chown ${DESTUSER}:${DESTUSER} $USERHOME/.vimrc
 cp ${DIRPATH}/srcs/tmux.conf ${USERHOME}/.tmux.conf
 chown ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
 
 if command_exists chsh; then
-    echo -e "${YELLOW}SET ZSH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
-    chsh -s /bin/zsh ${DESTUSER}
+    echo -e "${YELLOW}SET BASH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
+    chsh -s /bin/bash ${DESTUSER}
 fi
 
 echo -e "${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}

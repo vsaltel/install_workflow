@@ -1,0 +1,31 @@
+## Aliases      ##
+
+# If color support enable
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls="ls --color=auto"
+    alias grep="grep --color"
+fi
+
+# Git
+alias ga="git add"
+alias gc="git commit"
+alias gp="git push"
+alias gst="git status"
+alias gco="git checkout --"
+
+# Grep
+alias gr="grep -R"
+alias g="grep"
+
+# Ls
+alias l="ls -lakNF --group-directories-first -I '..' -I '.'"
+
+# Find
+alias f="find -name"
+alias fn="find -type f -name"
+alias fd="find -type d -name"
+alias fp="find -path"
+
+# Rm
+alias rr="rm -Rf"

@@ -59,13 +59,13 @@ else
     exit
 fi
 
-# Create log file and give perm to the user
+# Create log file
 touch ${LOGFILE}
-chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
 
 echo -e "${BOLD}${GREEN}INSTALLATION START !${NC}" | tee -a ${LOGFILE}
 # Super user Install
 if [ "${FORCE_EXEC}" -eq 0 ]; then
+    chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
     # Update
     echo -e "${BOLD}${YELLOW}APT UPDATE${NC}" | tee -a ${LOGFILE}
     apt-get -y update >> ${LOGFILE}
@@ -87,16 +87,16 @@ if [ "${FORCE_EXEC}" -eq 0 ]; then
 
     # Copy srcs files
     echo -e "${BOLD}${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
-    cp ${DIRPATH}/srcs/bashrc ${USERHOME}/.bashrc
-    chown ${DESTUSER}:${DESTUSER} $USERHOME/.bashrc
+    cp ${DIRPATH}/srcs/bashrc       ${USERHOME}/.bashrc
     cp ${DIRPATH}/srcs/bash_aliases ${USERHOME}/.bash_aliases
-    chown ${DESTUSER}:${DESTUSER} $USERHOME/.bash_aliases
-    cp ${DIRPATH}/srcs/bash_logout ${USERHOME}/.bash_logout
-    chown ${DESTUSER}:${DESTUSER} $USERHOME/.bash_logout
-    cp ${DIRPATH}/srcs/vimrc ${USERHOME}/.vimrc
-    chown ${DESTUSER}:${DESTUSER} $USERHOME/.vimrc
-    cp ${DIRPATH}/srcs/tmux.conf ${USERHOME}/.tmux.conf
-    chown ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
+    cp ${DIRPATH}/srcs/bash_logout  ${USERHOME}/.bash_logout
+    cp ${DIRPATH}/srcs/vimrc        ${USERHOME}/.vimrc
+    cp ${DIRPATH}/srcs/tmux.conf    ${USERHOME}/.tmux.conf
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bashrc
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bash_aliases
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bash_logout
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.vimrc
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.tmux.conf
 
     # Set user default shell
     if command_exists chsh; then
@@ -117,6 +117,12 @@ if [ "${FORCE_EXEC}" -eq 0 ]; then
     echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
     su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py" >> ${LOGFILE}
 
+    # Copy vim plugins config
+    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
+    mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+    cp ${DIRPATH}/srcs/c.snippets       ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
+    chown -R ${DESTUSER}:${DESTUSER}    ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+
 # Normal user Install
 elif [ "${FORCE_EXEC}" -eq 1 ]; then
     # Check required packages
@@ -130,11 +136,11 @@ elif [ "${FORCE_EXEC}" -eq 1 ]; then
 
     # Copy srcs files
     echo -e "${BOLD}${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
-    cp ${DIRPATH}/srcs/bashrc ${USERHOME}/.bashrc
+    cp ${DIRPATH}/srcs/bashrc       ${USERHOME}/.bashrc
     cp ${DIRPATH}/srcs/bash_aliases ${USERHOME}/.bash_aliases
-    cp ${DIRPATH}/srcs/bash_logout ${USERHOME}/.bash_logout
-    cp ${DIRPATH}/srcs/vimrc ${USERHOME}/.vimrc
-    cp ${DIRPATH}/srcs/tmux.conf ${USERHOME}/.tmux.conf
+    cp ${DIRPATH}/srcs/bash_logout  ${USERHOME}/.bash_logout
+    cp ${DIRPATH}/srcs/vimrc        ${USERHOME}/.vimrc
+    cp ${DIRPATH}/srcs/tmux.conf    ${USERHOME}/.tmux.conf
 
     # Install vim-plug
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
@@ -148,6 +154,12 @@ elif [ "${FORCE_EXEC}" -eq 1 ]; then
     # Install youcompleteme vim plugin
     echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
     python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py >> ${LOGFILE}
+
+    # Copy vim plugins config
+    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
+    mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+    cp ${DIRPATH}/srcs/c.snippets       ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
+    chown -R ${DESTUSER}:${DESTUSER}    ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
 fi
 
 echo -e "${BOLD}${GREEN}INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}

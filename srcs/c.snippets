@@ -1,0 +1,26 @@
+#Printf
+snippet p
+printf("${1:param}%s\n", ${2:vars});
+endsnippet
+
+#Functions
+snippet fv
+void   ${1:name}(${2:params})
+{
+	return ;
+}
+endsnippet
+
+snippet fi
+int   ${1:name}(${2:params})
+{
+	return (${3:val_ret});
+}
+endsnippet
+
+snippet fui
+unsigned int   ${1:name}(${2:params})
+{
+	return (${3:val_ret});
+}
+endsnippet

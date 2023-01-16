@@ -59,13 +59,14 @@ fi
 
 # set Prompt
 if [ "$color_prompt" = yes ]; then
-    reset=$(tput sgr0)
-    bold=$(tput bold)
-    red=$(tput setaf 1)
-    green=$(tput setaf 2)
-    yellow=$(tput setaf 3)
-    blue=$(tput setaf 4)
-    cyan=$(tput setaf 6)
+    reset="$(tput sgr0)"
+    bold="$(tput bold)"
+    red="$(tput setaf 1)"
+    green="$(tput setaf 2)"
+    yellow="$(tput setaf 3)"
+    blue="$(tput setaf 4)"
+    purple="$(tput setaf 5)"
+    cyan="$(tput setaf 6)"
     PROMPT_COMMAND=_prompt_command_color
 else
     PROMPT_COMMAND=_prompt_command
@@ -73,19 +74,21 @@ fi
 
 _prompt_command_color() {
         local EXIT="$?"
-        PS1="${reset}"
+        PS1="\[${reset}\]\n"
         if [ $EXIT -gt 0 ]; then
-            PS1+="${bold}${red}\$(printf %03d $EXIT)${reset} "
+            PS1+="\[${bold}\]\[${red}\]\$(printf %03d $EXIT)\[${reset}\]"
         else
-            PS1+="${bold}${green}\$(printf %03d $EXIT)${reset} "
+            PS1+="\[${bold}\]\[${green}\]\$(printf %03d $EXIT)\[${reset}\]"
         fi
-        PS1+="${bold}${cyan}[\w]${reset} \$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\
-${bold}${blue}git:(${reset}${bold}${yellow}\1${reset}${bold}${blue})${reset} /')"
+        PS1+="\[${bold}\]\[${cyan}\]\[|\[${reset}\]\[${bold}\]\[${purple}\]\$(printf %03d \!)\[${reset}\] \[${bold}\]\[${cyan}\][\w]\[${reset}\] \$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\
+\[${bold}\]\[${blue}\]git:(\[${reset}\]\[${bold}\]\[${yellow}\]\1\[${reset}\]\[${bold}\]\[${blue}\])\[${reset}\] /')"
         if [ $EXIT -gt 0 ]; then
-            PS1+=$'${bold}${red}\xE2\x9e\xA1${reset} '
+            PS1+="\[${bold}\]\[${red}\]"
         else
-            PS1+=$'${bold}${green}\xE2\x9e\xA1${reset} '
+            PS1+="\[${bold}\]\[${green}\]"
         fi
+        PS1+=$'\xE2\x9e\xA1'
+        PS1+="\[${reset}\]  "
 }
 
 _prompt_command() {

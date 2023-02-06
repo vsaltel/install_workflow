@@ -327,7 +327,7 @@ let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 
 " Tagbar
-nmap <silent> <F4> :TagbarToggle<CR>
+nmap <silent> <F4> :TagbarOpenAutoClose<CR>
 let g:tagbar_autofocus = 1
 
 " Disable visualbell

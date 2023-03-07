@@ -28,6 +28,11 @@ DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
 PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux"
 
+# FONT
+FONT_NAME="hack"
+FONT_ZIP="${FONT_NAME}.zip"
+FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip"
+
 ## START        ##
 # Get username
 if [ -n "${1}" -a "${1}" == "-f" ]; then
@@ -58,6 +63,8 @@ else
     echo -e "${BOLD}${RED}User not find${NC}"
     exit
 fi
+
+FONT_DIR="${USERHOME}.local/share/fonts"
 
 # Create log file
 touch ${LOGFILE}
@@ -104,6 +111,19 @@ if [ "${FORCE_EXEC}" -eq 0 ]; then
         chsh -s /bin/bash ${DESTUSER}
     fi
 
+    # Install fonts
+    echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
+    curl -Ls ${FONT_URL} --output ${FONT_ZIP}
+    if [ $? -eq 0 ]; then
+        unzip -d ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
+        rm ${FONT_NAME}/*Windows*
+        mkdir -p ${FONT_DIR}
+        cp -R ${FONT_NAME}/*.ttf ${FONT_DIR}
+        fc-cache -f -v >> ${LOGFILE}
+        echo -e "${BOLD}${GREEN}FONT INSTALLED\n! DONT FORGET TO SET IT !${NC}" | tee -a ${LOGFILE}
+    fi
+    rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
+
     # Install vim-plug
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
     su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
@@ -141,6 +161,19 @@ elif [ "${FORCE_EXEC}" -eq 1 ]; then
     cp ${DIRPATH}/srcs/bash_logout  ${USERHOME}/.bash_logout
     cp ${DIRPATH}/srcs/vimrc        ${USERHOME}/.vimrc
     cp ${DIRPATH}/srcs/tmux.conf    ${USERHOME}/.tmux.conf
+
+    # Install fonts
+    echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
+    curl -Ls ${FONT_URL} --output ${FONT_ZIP}
+    if [ $? -eq 0 ]; then
+        unzip -d ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
+        rm ${FONT_NAME}/*Windows*
+        mkdir -p ${FONT_DIR}
+        cp -R ${FONT_NAME}/*.ttf ${FONT_DIR}
+        fc-cache -f -v >> ${LOGFILE}
+        echo -e "${BOLD}${GREEN}FONT INSTALLED\n! DONT FORGET TO SET IT !${NC}" | tee -a ${LOGFILE}
+    fi
+    rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
 
     # Install vim-plug
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}

@@ -319,14 +319,19 @@ let g:UltiSnipsJumpForwardTrigger="<c-f>"
 let g:UltiSnipsJumpBackwardTrigger="<c-d>"
 let g:UltiSnipsEditSplit="vertical"
 
+" gitgutter
+let g:gitgutter_enabled = 0
+
 " ale
 let g:ale_enabled = 0
-nnoremap <C-S-a> :ALEToggle<CR>
 let g:ale_completion_enabled = 1
 let g:ale_linters = {}
 let g:ale_sign_column_always = 0
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
+
+" Toggle gitgutter and ALE
+nnoremap <C-S-a> :GitGutterToggle<CR>:ALEToggle<CR>
 
 " Tagbar
 nmap <silent> <F4> :TagbarOpenAutoClose<CR>

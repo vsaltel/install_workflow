@@ -27,6 +27,8 @@ FORCE_EXEC=0
 DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
 PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux"
+COPY_MODE=0
+COPY_DIR="${DIRPATH}/workflow_copy"
 
 # FONT
 FONT_NAME="hack"
@@ -35,6 +37,9 @@ FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.
 
 ## START        ##
 # Get username
+if [ -n "${1}" -a "${1}" == "-c" ]; then
+    COPY_MODE=1
+fi
 if [ -n "${1}" -a "${1}" == "-f" ]; then
     FORCE_EXEC=1
     DESTUSER=${USER}
@@ -69,6 +74,31 @@ FONT_DIR="${USERHOME}/.local/share/fonts"
 # Create log file
 touch ${LOGFILE}
 
+# Copy Mode
+if [ "${COPY_MODE}" -eq 1 ]; then
+    echo -e "${BOLD}${GREEN}COPY MODE START !${NC}"
+    if [ ! -e ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets ]; then
+        echo -e "${BOLD}${RED}NEED INSTALLATION BEFORE COPY MODE${NC}"
+        exit
+    fi
+    mkdir -p ${COPY_DIR}
+    echo -e "${BOLD}${GREEN}COPY DIRECTORY CREATED ! (${COPYDIR})${NC}" | tee -a ${LOGFILE}
+    cp -R ${USERHOME}/.bashrc ${COPY_DIR}
+    cp -R ${USERHOME}/.bash_aliases ${COPY_DIR}
+    cp -R ${USERHOME}/.bash_logout ${COPY_DIR}
+    cp -R ${USERHOME}/.tmux.conf ${COPY_DIR}
+    cp -R ${USERHOME}/.tmux ${COPY_DIR}
+    cp -R ${USERHOME}/.vimrc ${COPY_DIR}
+    cp -R ${USERHOME}/.vim ${COPY_DIR}
+    cp -R ${FONT_DIR} ${COPY_DIR}
+    if [ "${FORCE_EXEC}" -eq 0 ]; then
+        chown -R ${DESTUSER}:${DESTUSER} ${COPY_DIR}
+    fi
+    echo -e "${BOLD}${GREEN}COPY SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
+    exit
+fi
+
+# Start Install
 echo -e "${BOLD}${GREEN}INSTALLATION START !${NC}" | tee -a ${LOGFILE}
 # Super user Install
 if [ "${FORCE_EXEC}" -eq 0 ]; then
@@ -124,6 +154,16 @@ if [ "${FORCE_EXEC}" -eq 0 ]; then
     fi
     rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
 
+    # Install tpm
+    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
+    git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm
+
+    # Install tmux plugins
+    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
+    echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
+    chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux
+    su ${DESTUSER} -c "${USERHOME}/.tmux/plugins/tpm/bin/install_plugins" &>> ${LOGFILE}
+
     # Install vim-plug
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
     su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
@@ -174,6 +214,15 @@ elif [ "${FORCE_EXEC}" -eq 1 ]; then
         echo -e "${BOLD}${GREEN}FONT INSTALLED\n! DONT FORGET TO SET IT !${NC}" | tee -a ${LOGFILE}
     fi
     rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
+
+    # Install tpm
+    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
+    git clone https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm
+
+    # Install tmux plugins
+    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
+    echo "run \'${USERHOME}/.tmux/plugins/tpm/tpm\'" >> ${USERHOME}/.tmux.conf
+    ${USERHOME}/.tmux/plugins/tpm/bin/install_plugins >> ${LOGFILE}
 
     # Install vim-plug
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}

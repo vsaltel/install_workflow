@@ -320,9 +320,11 @@ let g:UltiSnipsJumpBackwardTrigger="<c-d>"
 let g:UltiSnipsEditSplit="vertical"
 
 " ale
+let g:ale_enabled = 0
+nnoremap <C-S-a> :ALEToggle<CR>
 let g:ale_completion_enabled = 1
 let g:ale_linters = {}
-let g:ale_sign_column_always = 1
+let g:ale_sign_column_always = 0
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 

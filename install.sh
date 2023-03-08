@@ -64,7 +64,7 @@ else
     exit
 fi
 
-FONT_DIR="${USERHOME}.local/share/fonts"
+FONT_DIR="${USERHOME}/.local/share/fonts"
 
 # Create log file
 touch ${LOGFILE}

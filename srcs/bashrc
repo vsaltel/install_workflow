@@ -15,11 +15,6 @@ case $- in
       *) return;;
 esac
 
-# Start tmux
-if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-  exec tmux new -As0
-fi
-
 # don't put duplicate lines or lines starting with space in the history.
 HISTCONTROL=ignoredups:erasedups
 
@@ -59,14 +54,18 @@ fi
 
 # set Prompt
 if [ "$color_prompt" = yes ]; then
-    reset="$(tput sgr0)"
-    bold="$(tput bold)"
-    red="$(tput setaf 1)"
-    green="$(tput setaf 2)"
-    yellow="$(tput setaf 3)"
-    blue="$(tput setaf 4)"
-    purple="$(tput setaf 5)"
-    cyan="$(tput setaf 6)"
+    reset="\[$(tput sgr0)\]"
+    bold="\[$(tput bold)\]"
+    fblack="\[$(tput setaf 0)\]"
+    fred="\[$(tput setaf 9)\]"
+    fgreen="\[$(tput setaf 76)\]"
+    forange="\[$(tput setaf 172)\]"
+    fgrey="\[$(tput setaf 238)\]"
+    bblack="\[$(tput setaf 0)\]"
+    bred="\[$(tput setab 9)\]"
+    bgreen="\[$(tput setab 76)\]"
+    borange="\[$(tput setab 172)\]"
+    bgrey="\[$(tput setab 238)\]"
     PROMPT_COMMAND=_prompt_command_color
 else
     PROMPT_COMMAND=_prompt_command
@@ -75,28 +74,30 @@ fi
 _prompt_command_color() {
         local EXIT="$?"
         PS1="\[${reset}\]"
+        #Ret value
         if [ $EXIT -gt 0 ]; then
-            PS1+="\[${bold}\]\[${red}\]\$(printf %03d $EXIT)\[${reset}\]"
+            PS1+="${bred}${fblack}\$(printf %03d $EXIT) ${reset}${borange}${fred}${reset}"
         else
-            PS1+="\[${bold}\]\[${green}\]\$(printf %03d $EXIT)\[${reset}\]"
+            PS1+="${bgreen}${fblack}\$(printf %03d ${EXIT}) ${reset}${borange}${fgreen}${reset}"
         fi
-        PS1+="\[${bold}\]\[${cyan}\]\[|\[${reset}\]\[${bold}\]\[${purple}\]\$(printf %03d \!)\[${reset}\] \[${bold}\]\[${cyan}\][\w]\[${reset}\] \$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\
-\[${bold}\]\[${blue}\]git:(\[${reset}\]\[${bold}\]\[${yellow}\]\1\[${reset}\]\[${bold}\]\[${blue}\])\[${reset}\] /')"
-        if [ $EXIT -gt 0 ]; then
-            PS1+="\[${bold}\]\[${red}\]"
+        #Directory
+        PS1+="${bold}${borange}${fblack} \w ${reset}"
+        #Git branch
+        BRANCH="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')"
+        if [ "${BRANCH}" ]; then
+            PS1+="${bgrey}${forange}${reset}${bgrey}${forange} ${BRANCH} ${reset}${reset}${fgrey}${reset}"
         else
-            PS1+="\[${bold}\]\[${green}\]"
+            PS1+="${forange}${reset}"
         fi
-        PS1+=$'\xE2\x9e\xA1'
-        PS1+="\[${reset}\]  "
+        #End
+        PS1+=" ${reset}"
 }
 
 _prompt_command() {
     local EXIT="$?"
     PS1=""
     PS1+="\$(printf %03d $EXIT) "
-    PS1+="\$? [\w] git:\$(git branch 2> /dev/null\
-| sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/') \$ \[$(tput sgr0)\]"
+    PS1+="\$? [\w] git:\$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/') \$ \[$(tput sgr0)\]"
 }
 
 unset color_prompt force_color_prompt

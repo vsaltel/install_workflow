@@ -60,12 +60,12 @@ if [ "$color_prompt" = yes ]; then
     fred="\[$(tput setaf 9)\]"
     fgreen="\[$(tput setaf 76)\]"
     forange="\[$(tput setaf 172)\]"
-    fgrey="\[$(tput setaf 238)\]"
+    fgrey="\[$(tput setaf 236)\]"
     bblack="\[$(tput setaf 0)\]"
     bred="\[$(tput setab 9)\]"
     bgreen="\[$(tput setab 76)\]"
     borange="\[$(tput setab 172)\]"
-    bgrey="\[$(tput setab 238)\]"
+    bgrey="\[$(tput setab 236)\]"
     PROMPT_COMMAND=_prompt_command_color
 else
     PROMPT_COMMAND=_prompt_command
@@ -73,24 +73,22 @@ fi
 
 _prompt_command_color() {
         local EXIT="$?"
-        PS1="\[${reset}\]"
+        PS1=""
         #Ret value
         if [ $EXIT -gt 0 ]; then
-            PS1+="${bred}${fblack}\$(printf %03d $EXIT) ${reset}${borange}${fred}${reset}"
+            PS1+="${bred}${fblack}$(printf %03d $EXIT) ${reset}${borange}${fred}${reset}"
         else
-            PS1+="${bgreen}${fblack}\$(printf %03d ${EXIT}) ${reset}${borange}${fgreen}${reset}"
+            PS1+="${bgreen}${fblack}$(printf %03d ${EXIT}) ${reset}${borange}${fgreen}${reset}"
         fi
         #Directory
         PS1+="${bold}${borange}${fblack} \w ${reset}"
         #Git branch
         BRANCH="$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')"
         if [ "${BRANCH}" ]; then
-            PS1+="${bgrey}${forange}${reset}${bgrey}${forange} ${BRANCH} ${reset}${reset}${fgrey}${reset}"
+            PS1+="${bgrey}${forange}${reset}${bgrey}${forange} ${BRANCH} ${reset}${fgrey}${reset} "
         else
-            PS1+="${forange}${reset}"
+            PS1+="${forange}${reset} "
         fi
-        #End
-        PS1+=" ${reset}"
 }
 
 _prompt_command() {

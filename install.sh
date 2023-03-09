@@ -1,60 +1,91 @@
 #!/bin/bash
 
 ## COLORS       ##
-if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-    NC=$(tput sgr0) # No Color
-    BOLD=$(tput bold)
-    RED=$(tput setaf 1)
-    GREEN=$(tput setaf 2)
-    YELLOW=$(tput setaf 3)
-    PURPLE=$(tput setaf 5)
-else
-    NC='\033[0m' # No Color
-    BOLD=''
-    RED='\033[0;31m'
-    GREEN='\033[0;32m'
-    YELLOW='\033[1;33m'
-    PURPLE='\033[1;35m'
+case "${TERM}" in
+    xterm-color|*-256color) COLOR_ENABLE=yes;;
+esac
+
+if [ "${COLOR_ENABLE}" = yes ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+        NC=$(tput sgr0) # No Color
+        BOLD=$(tput bold)
+        RED=$(tput setaf 1)
+        GREEN=$(tput setaf 2)
+        YELLOW=$(tput setaf 3)
+        PURPLE=$(tput setaf 5)
+    else
+        NC='\[\033[0m\]' # No Color
+        BOLD='\[\033[1m\]'
+        RED='\[\033[0;31m\]'
+        GREEN='\[\033[0;32m\]'
+        YELLOW='\[\033[1;33m\]'
+        PURPLE='\[\033[1;35m\]'
+    fi
 fi
 
 ## FUNCTIONS    ##
-command_exists() {
-    command -v "$@" >/dev/null 2>&1
+usage() {
+    echo -e "${BOLD}${RED}Usage :\n\tsudo ${0}\n\tor as root\n\t${0} [USER]${NC}"
 }
 
+command_exists() {
+    command -v "${@}" >/dev/null 2>&1
+}
+
+## PREREQUISITE ##
+PREREQUISITE="dirname getent bash"
+for PROG in ${PREREQUISITE}; do
+    if ! command_exists ${PROG}; then
+        echo -e "${BOLD}${RED}Need ${PROG} program${NC}"
+        exit 1
+    fi
+done
+
 ## VARS         ##
-FORCE_EXEC=0
 DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
-PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux"
+SRC_DIR="${DIRPATH}/srcs"
+CONFIG_FILES="bashrc bash_aliases bash_logout vimrc tmux.conf"
+PACKET_MANAGER="apt-get -y"
+PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux gawk"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
-
-# FONT
 FONT_NAME="hack"
 FONT_ZIP="${FONT_NAME}.zip"
 FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/download/v2.3.3/Hack.zip"
 
-## START        ##
+## Init
+# Parse args
+for i in "${@}"; do
+    case ${i} in
+        -c)
+            COPY_MODE=1
+            shift
+            ;;
+        -*|--*)
+            echo "Unknown option ${i}"
+            exit 1
+            ;;
+        *)
+            DESTUSER="${i}"
+            shift
+            ;;
+    esac
+done
+
 # Get username
-if [ -n "${1}" -a "${1}" == "-c" ]; then
-    COPY_MODE=1
-fi
-if [ -n "${1}" -a "${1}" == "-f" ]; then
-    FORCE_EXEC=1
-    DESTUSER=${USER}
-elif [ "${EUID}" -eq 0 ]; then
+if [ "${EUID}" -eq 0 ]; then
     if [ -n "${SUDO_USER}" ]; then
         DESTUSER=${SUDO_USER}
-    elif [ -n "${1}" ]; then
-        DESTUSER=${1}
-    else
-        echo -e "${BOLD}${RED}Usage :\n\tsudo ${0}\n\tor\n\t${0} [USER]${NC}"
-        exit
+    elif [ -z ${DESTUSER} ]; then
+        echo -e "${BOLD}${RED}Cannot install on root user${NC}"
+        usage
+        exit 2
     fi
 else
-    echo -e "${BOLD}${RED}Please run as root or force with -f${NC}"
-    exit
+    echo -e "${BOLD}${RED}Please run as root${NC}"
+    usage
+    exit 2
 fi
 
 # Get user home path
@@ -62,14 +93,15 @@ if [ -n ${DESTUSER} ]; then
     USERHOME=$(getent passwd ${DESTUSER} | cut -d: -f6)
     if [ -z ${USERHOME} ]; then
         echo -e "${BOLD}${RED}${DESTUSER} not exist on the system${NC}"
-        exit
+        usage
+        exit 3
     fi
+    FONT_DIR="${USERHOME}/.local/share/fonts"
 else
     echo -e "${BOLD}${RED}User not find${NC}"
-    exit
+    usage
+    exit 3
 fi
-
-FONT_DIR="${USERHOME}/.local/share/fonts"
 
 # Create log file
 touch ${LOGFILE}
@@ -79,7 +111,7 @@ if [ "${COPY_MODE}" -eq 1 ]; then
     echo -e "${BOLD}${GREEN}COPY MODE START !${NC}"
     if [ ! -e ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets ]; then
         echo -e "${BOLD}${RED}NEED INSTALLATION BEFORE COPY MODE${NC}"
-        exit
+        exit 4
     fi
     mkdir -p ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY DIRECTORY CREATED ! (${COPYDIR})${NC}" | tee -a ${LOGFILE}
@@ -91,152 +123,88 @@ if [ "${COPY_MODE}" -eq 1 ]; then
     cp -R ${USERHOME}/.vimrc ${COPY_DIR}
     cp -R ${USERHOME}/.vim ${COPY_DIR}
     cp -R ${FONT_DIR} ${COPY_DIR}
-    if [ "${FORCE_EXEC}" -eq 0 ]; then
-        chown -R ${DESTUSER}:${DESTUSER} ${COPY_DIR}
-    fi
+    chown -R ${DESTUSER}:${DESTUSER} ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
-    exit
+    exit 0
 fi
 
-# Start Install
+## START        ##
 echo -e "${BOLD}${GREEN}INSTALLATION START !${NC}" | tee -a ${LOGFILE}
-# Super user Install
-if [ "${FORCE_EXEC}" -eq 0 ]; then
-    chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
-    # Update
-    echo -e "${BOLD}${YELLOW}APT UPDATE${NC}" | tee -a ${LOGFILE}
-    apt-get -y update >> ${LOGFILE}
+chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
+# Update
+echo -e "${BOLD}${YELLOW}UPDATE PACKAGES${NC}" | tee -a ${LOGFILE}
+${PACKET_MANAGER} update >> ${LOGFILE}
+if [ ${?} -ne 0 ]; then
+    echo -e "${BOLD}${RED}UPDATE FAILED${NC}" | tee -a ${LOGFILE}
+    exit 5
+fi
+
+# Install Packages
+echo -e "${BOLD}${YELLOW}INSTALL PACKAGES:${NC}" | tee -a ${LOGFILE}
+for PACK in ${PACKAGES}; do
+    echo -e "${BOLD}${PURPLE}INSTALL ${PACK}${NC}" | tee -a ${LOGFILE}
+    ${PACKET_MANAGER} install $PACK >> ${LOGFILE}
     if [ ${?} -ne 0 ]; then
-        echo -e "${BOLD}${RED}UPDATE FAILED${NC}" | tee -a ${LOGFILE}
-        exit
+        echo -e "${BOLD}${RED}${PACK} INSTALLATION FAILED${NC}" | tee -a ${LOGFILE}
+        exit 5
     fi
+done
 
-    # Install Packages
-    echo -e "${BOLD}${YELLOW}APT INSTALL PACKAGES:${NC}" | tee -a ${LOGFILE}
-    for PACK in ${PACKAGES}; do
-        echo -e "${BOLD}${PURPLE}INSTALL ${PACK}${NC}" | tee -a ${LOGFILE}
-        apt-get -y install $PACK >> ${LOGFILE}
-        if [ ${?} -ne 0 ]; then
-            echo -e "${BOLD}${RED}${PACK} INSTALLATION FAILED${NC}" | tee -a ${LOGFILE}
-            exit
-        fi
-    done
+# Copy srcs files
+echo -e "${BOLD}${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
+for FILE in ${CONFIG_FILES}; do
+    cp ${SRC_DIR}/${FILE}           ${USERHOME}/.${FILE}
+    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.${FILE}
+done
 
-    # Copy srcs files
-    echo -e "${BOLD}${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
-    cp ${DIRPATH}/srcs/bashrc       ${USERHOME}/.bashrc
-    cp ${DIRPATH}/srcs/bash_aliases ${USERHOME}/.bash_aliases
-    cp ${DIRPATH}/srcs/bash_logout  ${USERHOME}/.bash_logout
-    cp ${DIRPATH}/srcs/vimrc        ${USERHOME}/.vimrc
-    cp ${DIRPATH}/srcs/tmux.conf    ${USERHOME}/.tmux.conf
-    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bashrc
-    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bash_aliases
-    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.bash_logout
-    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.vimrc
-    chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.tmux.conf
+# Set user default shell
+if command_exists chsh; then
+    echo -e "${BOLD}${YELLOW}SET BASH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
+    chsh -s /bin/bash ${DESTUSER}
+fi
 
-    # Set user default shell
-    if command_exists chsh; then
-        echo -e "${BOLD}${YELLOW}SET BASH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
-        chsh -s /bin/bash ${DESTUSER}
-    fi
-
-    # Install fonts
-    echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
-    curl -Ls ${FONT_URL} --output ${FONT_ZIP}
-    if [ $? -eq 0 ]; then
-        unzip -d ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
-        rm ${FONT_NAME}/*Windows*
-        mkdir -p ${FONT_DIR}
-        cp -R ${FONT_NAME}/*.ttf ${FONT_DIR}
+# Install fonts
+echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
+curl -Ls ${FONT_URL} --output "${DIRPATH}/${FONT_ZIP}"
+if [ ${?} -eq 0 ]; then
+    unzip -d "${DIRPATH}/${FONT_NAME}" "${DIRPATH}/${FONT_ZIP}" >> ${LOGFILE}
+    rm ${DIRPATH}/${FONT_NAME}/*Windows*
+    mkdir -p ${FONT_DIR}
+    cp -R ${DIRPATH}/${FONT_NAME}/*.ttf ${FONT_DIR}
+    chown -R ${DESTUSER}:${DESTUSER} ${FONT_DIR}
+    if command_exists fc-cache; then
         fc-cache -f -v >> ${LOGFILE}
-        echo -e "${BOLD}${GREEN}FONT INSTALLED\n! DONT FORGET TO SET IT !${NC}" | tee -a ${LOGFILE}
     fi
-    rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
+    echo -e "${BOLD}${GREEN}FONT INSTALLED ! (DONT FORGET TO SET IT !)${NC}" | tee -a ${LOGFILE}
+fi
+rm -Rf "${DIRPATH}/${FONT_NAME}" "${DIRPATH}/${FONT_ZIP}" &>> ${LOGFILE}
 
-    # Install tpm
-    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-    git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm
-
+## Tmux Setup
+# Install tpm
+echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
+echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
+su ${DESTUSER} -c "git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm" 2>> ${LOGFILE}
+if [ -e ${USERHOME}/.tmux/plugins/tpm ]; then
     # Install tmux plugins
     echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
-    echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
     chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux
     su ${DESTUSER} -c "${USERHOME}/.tmux/plugins/tpm/bin/install_plugins" &>> ${LOGFILE}
+fi
 
-    # Install vim-plug
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-    su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &>> ${LOGFILE}
-
+## Vim Setup
+# Install vim-plug
+echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
+su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
+    https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &>> ${LOGFILE}
+if [ ${?} -eq 0 ]; then
     # Install vim plugins
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS${NC}" | tee -a ${LOGFILE}
     su ${DESTUSER} -c "vim +'PlugInstall --sync' +quitall" &>> ${LOGFILE}
-
-    # Install youcompleteme vim plugin
-    echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
-    su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py" >> ${LOGFILE}
-
-    # Copy vim plugins config
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
-    mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
-    cp ${DIRPATH}/srcs/c.snippets       ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
-    chown -R ${DESTUSER}:${DESTUSER}    ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
-
-# Normal user Install
-elif [ "${FORCE_EXEC}" -eq 1 ]; then
-    # Check required packages
-    for PACK in ${PACKAGES}; do
-        ret=$(dpkg-query -W --showformat='${db:Status-Status}\n' "${PACK}")
-        if [ ! "${ret}" == "installed" ]; then
-            echo -e "${BOLD}${RED}${PACK} is missing${NC}"
-            exit
-        fi
-    done
-
-    # Copy srcs files
-    echo -e "${BOLD}${YELLOW}COPY CONFIG FILES${NC}" | tee -a ${LOGFILE}
-    cp ${DIRPATH}/srcs/bashrc       ${USERHOME}/.bashrc
-    cp ${DIRPATH}/srcs/bash_aliases ${USERHOME}/.bash_aliases
-    cp ${DIRPATH}/srcs/bash_logout  ${USERHOME}/.bash_logout
-    cp ${DIRPATH}/srcs/vimrc        ${USERHOME}/.vimrc
-    cp ${DIRPATH}/srcs/tmux.conf    ${USERHOME}/.tmux.conf
-
-    # Install fonts
-    echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
-    curl -Ls ${FONT_URL} --output ${FONT_ZIP}
-    if [ $? -eq 0 ]; then
-        unzip -d ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
-        rm ${FONT_NAME}/*Windows*
-        mkdir -p ${FONT_DIR}
-        cp -R ${FONT_NAME}/*.ttf ${FONT_DIR}
-        fc-cache -f -v >> ${LOGFILE}
-        echo -e "${BOLD}${GREEN}FONT INSTALLED\n! DONT FORGET TO SET IT !${NC}" | tee -a ${LOGFILE}
+    if [ ${?} -eq 0 ]; then
+        # Install youcompleteme vim plugin
+        echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
+        su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py" >> ${LOGFILE}
     fi
-    rm -Rf ${FONT_NAME} ${FONT_ZIP} >> ${LOGFILE}
-
-    # Install tpm
-    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-    git clone https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm
-
-    # Install tmux plugins
-    echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
-    echo "run \'${USERHOME}/.tmux/plugins/tpm/tpm\'" >> ${USERHOME}/.tmux.conf
-    ${USERHOME}/.tmux/plugins/tpm/bin/install_plugins >> ${LOGFILE}
-
-    # Install vim-plug
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-    curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim &>> ${LOGFILE}
-
-    # Install vim plugins
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS${NC}" | tee -a ${LOGFILE}
-    vim +'PlugInstall --sync' +quitall &>> ${LOGFILE}
-
-    # Install youcompleteme vim plugin
-    echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
-    python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py >> ${LOGFILE}
-
     # Copy vim plugins config
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
     mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips

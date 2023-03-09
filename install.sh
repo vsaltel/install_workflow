@@ -33,7 +33,7 @@ command_exists() {
 }
 
 ## PREREQUISITE ##
-PREREQUISITE="dirname getent bash"
+PREREQUISITE="bash dirname getent tar"
 for PROG in ${PREREQUISITE}; do
     if ! command_exists ${PROG}; then
         echo -e "${BOLD}${RED}Need ${PROG} program${NC}"
@@ -45,9 +45,10 @@ done
 DIRPATH=$(dirname ${0})
 LOGFILE="${DIRPATH}/logs.txt"
 SRC_DIR="${DIRPATH}/srcs"
-CONFIG_FILES="bashrc bash_aliases bash_logout vimrc tmux.conf"
+CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf"
+CONFIG_DIRS="zsh vim tmux"
 PACKET_MANAGER="apt-get -y"
-PACKAGES="gcc make cmake curl python3 python3-pip git bash vim vim-gui-common vim-runtime tmux gawk"
+PACKAGES="gcc make cmake curl python3 python3-pip git zsh vim vim-gui-common vim-runtime tmux gawk"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
 FONT_NAME="hack"
@@ -96,7 +97,6 @@ if [ -n ${DESTUSER} ]; then
         usage
         exit 3
     fi
-    FONT_DIR="${USERHOME}/.local/share/fonts"
 else
     echo -e "${BOLD}${RED}User not find${NC}"
     usage
@@ -115,13 +115,12 @@ if [ "${COPY_MODE}" -eq 1 ]; then
     fi
     mkdir -p ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY DIRECTORY CREATED ! (${COPYDIR})${NC}" | tee -a ${LOGFILE}
-    cp -R ${USERHOME}/.bashrc ${COPY_DIR}
-    cp -R ${USERHOME}/.bash_aliases ${COPY_DIR}
-    cp -R ${USERHOME}/.bash_logout ${COPY_DIR}
-    cp -R ${USERHOME}/.tmux.conf ${COPY_DIR}
-    cp -R ${USERHOME}/.tmux ${COPY_DIR}
-    cp -R ${USERHOME}/.vimrc ${COPY_DIR}
-    cp -R ${USERHOME}/.vim ${COPY_DIR}
+    for FILE in ${CONFIG_FILES}; do
+        cp -R ${USERHOME}/.${FILE} ${COPY_DIR}
+    done
+    for DIR in ${CONFIG_DIRS}; do
+        cp -R ${USERHOME}/.${DIR} ${COPY_DIR}
+    done
     cp -R ${FONT_DIR} ${COPY_DIR}
     chown -R ${DESTUSER}:${DESTUSER} ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
@@ -157,16 +156,36 @@ for FILE in ${CONFIG_FILES}; do
     chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.${FILE}
 done
 
+
+# Install shell
+echo -e "${BOLD}${YELLOW}INSTALL SHELL PLUGINS${NC}" | tee -a ${LOGFILE}
+mkdir -p ${USERHOME}/.zsh/plugins
+git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting 2>> ${LOGFILE}
+chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh
+if [ -e ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting ]; then
+    echo "source ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${USERHOME}/.zshrc
+fi
+
+# Lf install
+echo -e "${BOLD}${YELLOW}INSTALL LF${NC}" | tee -a ${LOGFILE}
+mkdir -p ${USERHOME}/.zsh/plugins/lf
+curl -Ls https://github.com/gokcehan/lf/releases/download/r13/lf-linux-amd64.tar.gz --output ${USERHOME}/.zsh/plugins/lf/lf.tar
+if [ -e ${USERHOME}/.zsh/plugins/lf/lf.tar ]; then
+    chown ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh/plugins/lf/lf.tar
+    su ${DESTUSER} -c "tar -xvf ${USERHOME}/.zsh/plugins/lf/lf.tar -C /usr/local/bin" &>> ${LOGFILE}
+fi
+
 # Set user default shell
 if command_exists chsh; then
-    echo -e "${BOLD}${YELLOW}SET BASH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
-    chsh -s /bin/bash ${DESTUSER}
+    echo -e "${BOLD}${YELLOW}SET ZSH DEFAULT SHELL${NC}" | tee -a ${LOGFILE}
+    chsh -s /bin/zsh ${DESTUSER}
 fi
 
 # Install fonts
 echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
 curl -Ls ${FONT_URL} --output "${DIRPATH}/${FONT_ZIP}"
 if [ ${?} -eq 0 ]; then
+    FONT_DIR="${USERHOME}/.local/share/fonts"
     unzip -d "${DIRPATH}/${FONT_NAME}" "${DIRPATH}/${FONT_ZIP}" >> ${LOGFILE}
     rm ${DIRPATH}/${FONT_NAME}/*Windows*
     mkdir -p ${FONT_DIR}
@@ -175,18 +194,17 @@ if [ ${?} -eq 0 ]; then
     if command_exists fc-cache; then
         fc-cache -f -v >> ${LOGFILE}
     fi
-    echo -e "${BOLD}${GREEN}FONT INSTALLED ! (DONT FORGET TO SET IT !)${NC}" | tee -a ${LOGFILE}
 fi
 rm -Rf "${DIRPATH}/${FONT_NAME}" "${DIRPATH}/${FONT_ZIP}" &>> ${LOGFILE}
 
 ## Tmux Setup
 # Install tpm
 echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
 su ${DESTUSER} -c "git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm" 2>> ${LOGFILE}
 if [ -e ${USERHOME}/.tmux/plugins/tpm ]; then
     # Install tmux plugins
     echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
+    echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
     chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux
     su ${DESTUSER} -c "${USERHOME}/.tmux/plugins/tpm/bin/install_plugins" &>> ${LOGFILE}
 fi
@@ -213,3 +231,4 @@ if [ ${?} -eq 0 ]; then
 fi
 
 echo -e "${BOLD}${GREEN}INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
+echo -e "${BOLD}${GREEN}(DONT FORGET TO SET THE FONT)${NC}" | tee -a ${LOGFILE}

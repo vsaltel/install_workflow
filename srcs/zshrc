@@ -1,0 +1,114 @@
+################################################
+#                                              #
+#   ███████╗███████╗██╗  ██╗██████╗  ██████╗   #
+#   ╚══███╔╝██╔════╝██║  ██║██╔══██╗██╔════╝   #
+#     ███╔╝ ███████╗███████║██████╔╝██║        #
+#    ███╔╝  ╚════██║██╔══██║██╔══██╗██║        #
+#   ███████╗███████║██║  ██║██║  ██║╚██████╗   #
+#   ╚══════╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝   #
+#                                              #
+################################################
+
+# Set colors
+autoload -U colors && colors
+rsf="%f"
+rsk="%k"
+rsa="%f%k"
+fblack="%F{0}"
+fred="%F{9}"
+fgreen="%F{76}"
+forange="%F{172}"
+fgrey="%F{236}"
+bblack="%K{0}"
+bred="%K{9}"
+bgreen="%K{76}"
+borange="%K{172}"
+bgrey="%K{236}"
+
+# Enabling and setting git info var to be used in prompt config.
+autoload -Uz vcs_info
+zstyle ':vcs_info:*' enable git svn
+# This line obtains information from the vcs.
+zstyle ':vcs_info:git*' formats "%b"
+precmd() {
+    vcs_info
+}
+# Enable substitution in the prompt.
+setopt prompt_subst
+
+# Set ret value
+ret_value () {
+    RET_VALUE="$?"
+}
+
+# Set prompt
+prompt () {
+    PS1=""
+    #Ret value
+    if [ "${RET_VALUE}" -eq 0 ];then
+        PS1+="${bgreen}${fblack}0 ${rsa}${borange}${fgreen}${rsa}"
+    else
+        PS1+="${bred}${fblack}${RET_VALUE} ${rsa}${borange}${fred}${rsa}"
+    fi
+    #Directory
+    PS1+="${borange}${fblack} %~ ${rsa}"
+    #Git branch
+    setopt PROMPT_SUBST
+    if [ "${vcs_info_msg_0_}" ]; then
+        PS1+="${bgrey}${forange}${rsa}${bgrey}${forange} ${vcs_info_msg_0_} ${rsa}${fgrey}${rsf} "
+    else
+        PS1+="${forange}${rsf} "
+    fi
+}
+
+# Init prompt
+precmd_functions+=(ret_value)
+precmd_functions+=(prompt)
+
+# History parameters:
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=${HOME}/.zsh_history
+
+# Basic auto/tab complete:
+autoload -U compinit
+zstyle ':completion:*' menu select
+zmodload zsh/complist
+compinit
+_comp_options+=(globdots)
+
+# vi mode
+bindkey -v
+export KEYTIMEOUT=1
+
+# Enable reverse search
+bindkey '^R' history-incremental-search-backward
+
+# Use vim keys in tab complete menu:
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+bindkey -v '^?' backward-delete-char
+
+# Use lf to switch directories and bind it to ctrl-o
+lfcd () {
+    tmp="$(mktemp)"
+    lf -last-dir-path="$tmp" "$@"
+    if [ -f "$tmp" ]; then
+        dir="$(cat "$tmp")"
+        rm -f "$tmp"
+        [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
+    fi
+}
+bindkey -s '^o' 'lfcd\n'
+
+# Edit line in vim with ctrl-e:
+autoload edit-command-line; zle -N edit-command-line
+bindkey '^e' edit-command-line
+#
+# Load aliases
+if [ -f ${HOME}/.zsh_aliases ]; then
+    source ${HOME}/.zsh_aliases
+fi
+

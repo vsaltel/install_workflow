@@ -97,6 +97,7 @@ if [ -n ${DESTUSER} ]; then
         usage
         exit 3
     fi
+    FONT_DIR="${USERHOME}/.local/share/fonts"
 else
     echo -e "${BOLD}${RED}User not find${NC}"
     usage
@@ -116,12 +117,12 @@ if [ "${COPY_MODE}" -eq 1 ]; then
     mkdir -p ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY DIRECTORY CREATED ! (${COPYDIR})${NC}" | tee -a ${LOGFILE}
     for FILE in ${CONFIG_FILES}; do
-        cp -R ${USERHOME}/.${FILE} ${COPY_DIR}
+        cp -R ${USERHOME}/.${FILE} ${COPY_DIR}/${FILE}
     done
     for DIR in ${CONFIG_DIRS}; do
-        cp -R ${USERHOME}/.${DIR} ${COPY_DIR}
+        cp -R ${USERHOME}/.${DIR} ${COPY_DIR}/${DIR}
     done
-    cp -R ${FONT_DIR} ${COPY_DIR}
+    cp -R ${FONT_DIR} ${COPY_DIR}/fonts
     chown -R ${DESTUSER}:${DESTUSER} ${COPY_DIR}
     echo -e "${BOLD}${GREEN}COPY SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
     exit 0
@@ -190,7 +191,6 @@ fi
 echo -e "${BOLD}${YELLOW}INSTALL FONT ${FONT_NAME}${NC}" | tee -a ${LOGFILE}
 curl -Ls ${FONT_URL} --output "${DIRPATH}/${FONT_ZIP}"
 if [ ${?} -eq 0 ]; then
-    FONT_DIR="${USERHOME}/.local/share/fonts"
     unzip -d "${DIRPATH}/${FONT_NAME}" "${DIRPATH}/${FONT_ZIP}" >> ${LOGFILE}
     rm ${DIRPATH}/${FONT_NAME}/*Windows*
     mkdir -p ${FONT_DIR}
@@ -229,10 +229,12 @@ if [ ${?} -eq 0 ]; then
         su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py" >> ${LOGFILE}
     fi
     # Copy vim plugins config
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
-    mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
-    cp ${DIRPATH}/srcs/c.snippets       ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
-    chown -R ${DESTUSER}:${DESTUSER}    ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+    echo -e "${BOLD}${YELLOW}COPY VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
+    if [ -e ${DIRPATH}/srcs/c.snippets ]; then
+        mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+        cp ${DIRPATH}/srcs/c.snippets ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
+        chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+    fi
 fi
 
 echo -e "${BOLD}${GREEN}INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}

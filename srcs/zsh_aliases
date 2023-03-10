@@ -12,7 +12,7 @@ alias ga="git add"
 alias gc="git commit"
 alias gp="git push"
 alias gst="git status"
-alias gco="git checkout --"
+alias gco="git checkout"
 
 # Grep
 alias gr="grep -R"
@@ -29,3 +29,16 @@ alias fp="find -path"
 
 # Rm
 alias rr="rm -Rf"
+
+# Cp
+alias cr="cp -R"
+
+# Make
+alias m="make"
+alias mc="make clean"
+alias mf="make fclean"
+alias me="make re"
+
+# Daemons
+alias sysa="systemctl list-units --type=service"
+alias syss="systemctl status"

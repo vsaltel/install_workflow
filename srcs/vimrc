@@ -14,9 +14,9 @@
 "************************************************
 let vimplug_exists=expand('~/.vim/autoload/plug.vim')
 if has('win32')&&!has('win64')
-  let curl_exists=expand('C:\Windows\Sysnative\curl.exe')
+    let curl_exists=expand('C:\Windows\Sysnative\curl.exe')
 else
-  let curl_exists=expand('curl')
+    let curl_exists=expand('curl')
 endif
 
 let g:vim_bootstrap_langs = "c"
@@ -25,16 +25,16 @@ let g:vim_bootstrap_theme = "gruvbox"
 let g:vim_bootstrap_frams = ""
 
 if !filereadable(vimplug_exists)
-  if !executable(curl_exists)
-    echoerr "You have to install curl or first install vim-plug yourself!"
-    execute "q!"
-  endif
-  echo "Installing Vim-Plug..."
-  echo ""
-  silent exec "!"curl_exists" -fLo " . shellescape(vimplug_exists) . " --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
-  let g:not_finish_vimplug = "yes"
+    if !executable(curl_exists)
+        echoerr "You have to install curl or first install vim-plug yourself!"
+        execute "q!"
+    endif
+    echo "Installing Vim-Plug..."
+    echo ""
+    silent exec "!"curl_exists" -fLo " . shellescape(vimplug_exists) . " --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+    let g:not_finish_vimplug = "yes"
 
-  autocmd VimEnter * PlugInstall
+    autocmd VimEnter * PlugInstall
 endif
 
 " Required:
@@ -132,28 +132,26 @@ set guioptions=egmrti
 set gfn=Monospace\ 10
 
 if has("gui_running")
-  if has("gui_mac") || has("gui_macvim")
-    set guifont=Menlo:h12
-    set transparency=7
-  endif
-else
-  let g:CSApprox_loaded = 1
-
-  " IndentLine
-  let g:indentLine_enabled = 1
-  let g:indentLine_concealcursor = ''
-  let g:indentLine_char = '┆'
-  let g:indentLine_faster = 1
-
-
-  if $COLORTERM == 'gnome-terminal'
-    set term=gnome-256color
-  else
-    if $TERM == 'xterm'
-      set term=xterm-256color
+    if has("gui_mac") || has("gui_macvim")
+        set guifont=Menlo:h12
+        set transparency=7
     endif
-  endif
+else
+    let g:CSApprox_loaded = 1
 
+    " IndentLine
+    let g:indentLine_enabled = 1
+    let g:indentLine_concealcursor = ''
+    let g:indentLine_char = '┆'
+    let g:indentLine_faster = 1
+
+    if $COLORTERM == 'gnome-terminal'
+        set term=gnome-256color
+    else
+        if $TERM == 'xterm'
+            set term=xterm-256color
+        endif
+    endif
 endif
 
 if &term =~ '256color'
@@ -186,7 +184,7 @@ nnoremap n nzzzv
 nnoremap N Nzzzv
 
 if exists("*fugitive#statusline")
-  set statusline+=%{fugitive#statusline()}
+    set statusline+=%{fugitive#statusline()}
 endif
 
 " vim-airline
@@ -223,6 +221,7 @@ let g:NERDTreeShowBookmarks=1
 let g:nerdtree_tabs_focus_on_files=1
 let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
 let g:NERDTreeWinSize = 25
+let g:NERDTreeMinimalUI=1
 nnoremap <silent> <F2> :NERDTree<CR>
 nnoremap <silent> <F3> :NERDTreeToggle<CR>
 
@@ -256,29 +255,43 @@ endif
 "************************************************
 "" Autocmd Rules
 "************************************************
+
+" Set bookmark map
+augroup vimrc-nerdtree-bookmark
+    autocmd!
+    autocmd Filetype nerdtree nnoremap <buffer> <leader>b :Bookmark<CR>
+augroup END
+
+" Start NERDTree when Vim is started without file arguments.
+augroup vimrc-nerdtree-fromstart
+    autocmd!
+    autocmd StdinReadPre * let s:std_in=1
+    autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+augroup END
+
 "" The PC is fast enough, do syntax highlight syncing from start unless 200 lines
 augroup vimrc-sync-fromstart
-  autocmd!
-  autocmd BufEnter * :syntax sync maxlines=200
+    autocmd!
+    autocmd BufEnter * :syntax sync maxlines=200
 augroup END
 
 "" Remember cursor position
 augroup vimrc-remember-cursor-position
-  autocmd!
-  autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
+    autocmd!
+    autocmd BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
 augroup END
 
 "" txt
 augroup vimrc-wrapping
-  autocmd!
-  autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
+    autocmd!
+    autocmd BufRead,BufNewFile *.txt call s:setupWrapping()
 augroup END
 
 "" make/cmake
 augroup vimrc-make-cmake
-  autocmd!
-  autocmd FileType make setlocal noexpandtab
-  autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
+    autocmd!
+    autocmd FileType make setlocal noexpandtab
+    autocmd BufNewFile,BufRead CMakeLists.txt setlocal filetype=cmake
 augroup END
 
 set autoread
@@ -340,7 +353,7 @@ let g:tagbar_autofocus = 1
 " Disable visualbell
 set noerrorbells visualbell t_vb=
 if has('autocmd')
-  autocmd GUIEnter * set visualbell t_vb=
+    autocmd GUIEnter * set visualbell t_vb=
 endif
 
 "" Copy/Paste/Cut
@@ -394,55 +407,55 @@ autocmd FileType cpp setlocal tabstop=4 shiftwidth=4 expandtab
 " vim-airline
 let g:airline#extensions#tabline#enabled = 0
 if !exists('g:airline_symbols')
-  let g:airline_symbols = {}
+    let g:airline_symbols = {}
 endif
 
 if !exists('g:airline_powerline_fonts')
-  let g:airline_left_sep = ''
-  let g:airline_left_alt_sep = '»'
-  let g:airline_right_sep = ''
-  let g:airline_right_alt_sep = '«'
-  let g:airline_symbols.colnr = ' C'
-  let g:airline_symbols.crypt = '🔒'
-  let g:airline_symbols.linenr = ' '
-  let g:airline_symbols.maxlinenr = ' '
-  let g:airline_symbols.branch = '⎇'
-  let g:airline_symbols.paste = 'ρ'
-  let g:airline_symbols.spell = 'Ꞩ'
-  let g:airline_symbols.notexists = 'Ɇ'
-  let g:airline_symbols.whitespace = 'Ξ'
-  let g:airline#extensions#tabline#left_sep = ' '
-  let g:airline#extensions#tabline#left_alt_sep = '|'
-  let g:airline#extensions#branch#prefix     = '⤴' "➔, ➥, ⎇
-  let g:airline#extensions#readonly#symbol   = '⊘'
-  let g:airline#extensions#linecolumn#prefix = '¶'
-  let g:airline#extensions#paste#symbol      = 'ρ'
+    let g:airline_left_sep = ''
+    let g:airline_left_alt_sep = '»'
+    let g:airline_right_sep = ''
+    let g:airline_right_alt_sep = '«'
+    let g:airline_symbols.colnr = ' C'
+    let g:airline_symbols.crypt = '🔒'
+    let g:airline_symbols.linenr = ' '
+    let g:airline_symbols.maxlinenr = ' '
+    let g:airline_symbols.branch = '⎇'
+    let g:airline_symbols.paste = 'ρ'
+    let g:airline_symbols.spell = 'Ꞩ'
+    let g:airline_symbols.notexists = 'Ɇ'
+    let g:airline_symbols.whitespace = 'Ξ'
+    let g:airline#extensions#tabline#left_sep = ' '
+    let g:airline#extensions#tabline#left_alt_sep = '|'
+    let g:airline#extensions#branch#prefix     = '⤴' "➔, ➥, ⎇
+    let g:airline#extensions#readonly#symbol   = '⊘'
+    let g:airline#extensions#linecolumn#prefix = '¶'
+    let g:airline#extensions#paste#symbol      = 'ρ'
 else
-  let g:airline#extensions#tabline#left_sep = ''
-  let g:airline#extensions#tabline#left_alt_sep = ''
+    let g:airline#extensions#tabline#left_sep = ''
+    let g:airline#extensions#tabline#left_alt_sep = ''
 endif
 
-let g:airline_mode_map ={
-      \ '__'     : '-',
-      \ 'c'      : 'C',
-      \ 'i'      : 'I',
-      \ 'ic'     : 'I',
-      \ 'ix'     : 'I',
-      \ 'n'      : 'N',
-      \ 'multi'  : 'M',
-      \ 'ni'     : 'N',
-      \ 'no'     : 'N',
-      \ 'R'      : 'R',
-      \ 'Rv'     : 'R',
-      \ 's'      : 'S',
-      \ 'S'      : 'S',
-      \ ''     : 'S',
-      \ 't'      : 'T',
-      \ 'v'      : 'V',
-      \ 'V'      : 'V',
-      \ ''     : 'V',
-      \ }
+let g:airline_mode_map = {
+    \ '__'     : '-',
+    \ 'c'      : 'C',
+    \ 'i'      : 'I',
+    \ 'ic'     : 'I',
+    \ 'ix'     : 'I',
+    \ 'n'      : 'N',
+    \ 'multi'  : 'M',
+    \ 'ni'     : 'N',
+    \ 'no'     : 'N',
+    \ 'R'      : 'R',
+    \ 'Rv'     : 'R',
+    \ 's'      : 'S',
+    \ 'S'      : 'S',
+    \ ''     : 'S',
+    \ 't'      : 'T',
+    \ 'v'      : 'V',
+    \ 'V'      : 'V',
+    \ ''     : 'V',
+    \ }
 
 let g:airline_filetype_overrides = {
-      \ 'nerdtree': [ get(g:, 'NERDTreeStatusline', 'NTree'), '' ],
-      \ }
+    \ 'nerdtree': [ get(g:, 'NERDTreeStatusline', 'NTree'), '' ],
+    \ }

@@ -161,10 +161,15 @@ done
 echo -e "${BOLD}${YELLOW}INSTALL SHELL PLUGINS${NC}" | tee -a ${LOGFILE}
 mkdir -p ${USERHOME}/.zsh/plugins
 git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting 2>> ${LOGFILE}
-chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh
 if [ -e ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting ]; then
     echo "source ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${USERHOME}/.zshrc
 fi
+git clone -q https://github.com/zsh-users/zsh-autosuggestions ${USERHOME}/.zsh/plugins/zsh-autosuggestions 2>> ${LOGFILE}
+if [ -e ${USERHOME}/.zsh/plugins/zsh-autosuggestions ]; then
+    echo "source ${USERHOME}/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ${USERHOME}/.zshrc
+fi
+
+chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh
 
 # Lf install
 echo -e "${BOLD}${YELLOW}INSTALL LF${NC}" | tee -a ${LOGFILE}

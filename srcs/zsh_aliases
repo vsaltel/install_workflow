@@ -19,7 +19,7 @@ alias gr="grep -R"
 alias g="grep"
 
 # Ls
-alias l="ls -lakNF --group-directories-first -I '..' -I '.'"
+alias l="ls -lakvNF --group-directories-first -I '..' -I '.'"
 
 # Find
 alias f="find -name"

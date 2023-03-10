@@ -256,10 +256,10 @@ endif
 "" Autocmd Rules
 "************************************************
 
-" Set bookmark map
+" Set NERDTree bookmark map
 augroup vimrc-nerdtree-bookmark
     autocmd!
-    autocmd Filetype nerdtree nnoremap <buffer> <leader>b :Bookmark<CR>
+    autocmd Filetype nerdtree nnoremap <buffer> b :Bookmark<CR>
 augroup END
 
 " Start NERDTree when Vim is started without file arguments.

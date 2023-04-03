@@ -37,12 +37,10 @@ if !filereadable(vimplug_exists)
     autocmd VimEnter * PlugInstall
 endif
 
-" Required:
-call plug#begin(expand('~/.vim/plugged'))
-
 "************************************************
 "" Plug install packages
 "************************************************
+call plug#begin(expand('~/.vim/plugged'))
 Plug 'scrooloose/nerdtree'
 Plug 'jistr/vim-nerdtree-tabs'
 Plug 'tpope/vim-commentary'
@@ -57,14 +55,14 @@ Plug 'majutsushi/tagbar'
 Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'ycm-core/YouCompleteMe' " Completion
+Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
 Plug 'alpertuna/vim-header' " Header
 Plug 'SirVer/ultisnips'
 Plug 'morhetz/gruvbox'
+Plug 'ludovicchabant/vim-gutentags'
 call plug#end()
 
-" Required:
 filetype plugin indent on
-
 
 "************************************************
 "" Basic Setup
@@ -343,6 +341,18 @@ let g:ale_linters = {}
 let g:ale_sign_column_always = 0
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
+
+" YouCompleteMe
+let g:ycm_cache_omnifunc = 1
+let g:ycm_confirm_extra_conf = 0
+let g:ycm_seed_identifiers_with_syntax = 0
+let g:ycm_collect_identifiers_from_tags_files = 0
+let g:ycm_disable_for_files_larger_than_kb = 1000
+let g:ycm_min_num_of_chars_for_completion = 2
+let g:ycm_min_num_identifier_candidate_chars = 0
+let g:ycm_max_num_candidates = 50
+set completeopt-=preview
+nnoremap <F8> :YcmGenerateConfig<CR>
 
 " Toggle gitgutter and ALE
 nnoremap <C-S-a> :GitGutterToggle<CR>:ALEToggle<CR>

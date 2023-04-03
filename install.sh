@@ -48,7 +48,12 @@ SRC_DIR="${DIRPATH}/srcs"
 CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf"
 CONFIG_DIRS="zsh vim tmux"
 PACKET_MANAGER="apt-get -y"
-PACKAGES="gcc make cmake curl python3 python3-pip git zsh vim vim-gui-common vim-runtime tmux gawk"
+PACKAGES="libncurses5-dev libgtk2.0-dev libatk1.0-dev libcairo2-dev     \
+    libx11-dev libxpm-dev libxt-dev python2-dev python3-dev ruby-dev    \
+    lua5.2 liblua5.2-dev libperl-dev git gcc clang make cmake curl      \
+    python3 python3-pip zsh libncurses-dev exuberant-ctags tmux gawk"
+DELPACKAGES="vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
+    vim-gui-common vim-nox"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
 FONT_NAME="hack"
@@ -143,9 +148,20 @@ fi
 echo -e "${BOLD}${YELLOW}INSTALL PACKAGES:${NC}" | tee -a ${LOGFILE}
 for PACK in ${PACKAGES}; do
     echo -e "${BOLD}${PURPLE}INSTALL ${PACK}${NC}" | tee -a ${LOGFILE}
-    ${PACKET_MANAGER} install $PACK >> ${LOGFILE}
+    ${PACKET_MANAGER} install $PACK &>> ${LOGFILE}
     if [ ${?} -ne 0 ]; then
         echo -e "${BOLD}${RED}${PACK} INSTALLATION FAILED${NC}" | tee -a ${LOGFILE}
+        exit 5
+    fi
+done
+
+# Uninstall Packages
+echo -e "${BOLD}${YELLOW}UNINSTALL STANDARD PACKAGES:${NC}" | tee -a ${LOGFILE}
+for PACK in ${DELPACKAGES}; do
+    echo -e "${BOLD}${PURPLE}UNINSTALL ${PACK}${NC}" | tee -a ${LOGFILE}
+    ${PACKET_MANAGER} remove $PACK &>> ${LOGFILE}
+    if [ ${?} -ne 0 ]; then
+        echo -e "${BOLD}${RED}${PACK} UNINSTALLATION FAILED${NC}" | tee -a ${LOGFILE}
         exit 5
     fi
 done
@@ -178,7 +194,8 @@ mkdir -p ${USERHOME}/.zsh/plugins/lf
 curl -Ls https://github.com/gokcehan/lf/releases/download/r13/lf-linux-amd64.tar.gz --output ${USERHOME}/.zsh/plugins/lf/lf.tar
 if [ -e ${USERHOME}/.zsh/plugins/lf/lf.tar ]; then
     chown ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh/plugins/lf/lf.tar
-    su ${DESTUSER} -c "tar -xvf ${USERHOME}/.zsh/plugins/lf/lf.tar -C /usr/local/bin" &>> ${LOGFILE}
+    tar -xvf ${USERHOME}/.zsh/plugins/lf/lf.tar -C /usr/local/bin >> ${LOGFILE}
+    chmod 755 /usr/local/bin/lf &>> ${LOGFILE}
 fi
 
 # Set user default shell
@@ -215,6 +232,29 @@ if [ -e ${USERHOME}/.tmux/plugins/tpm ]; then
 fi
 
 ## Vim Setup
+# Install vim
+echo -e "${BOLD}${YELLOW}INSTALL VIM 9${NC}" | tee -a ${LOGFILE}
+git clone -q https://github.com/vim/vim.git ${DIRPATH}/vim 2>> ${LOGFILE}
+if [ -e ${DIRPATH}/vim ]; then
+    cd ${DIRPATH}/vim
+    ./configure --with-features=huge --enable-multibyte --enable-rubyinterp=yes \
+        --enable-python3interp=yes --with-python3-config-dir=$(python3-config --configdir) \
+        --enable-perlinterp=yes --enable-luainterp=yes --enable-gui=gtk2 --enable-cscope \
+        --prefix=/usr/local &>> ${LOGFILE} make VIMRUNTIMEDIR=/usr/local/share/vim/vim90 &>> ${LOGFILE}
+    make install &>> ${LOGFILE}
+    if command_exists update-alternatives; then
+        update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1 &>> ${LOGFILE}
+        update-alternatives --set editor /usr/local/bin/vim &>> ${LOGFILE}
+        update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1 &>> ${LOGFILE}
+        update-alternatives --set vi /usr/local/bin/vim &>> ${LOGFILE}
+    fi
+    cd - >> ${LOGFILE}
+    if [ ! -e /usr/local/bin/vim ]; then
+        echo -e "${BOLD}${RED}${PACK} VIM INSTALL FAILED${NC}" | tee -a ${LOGFILE}
+        exit 6
+    fi
+    rm -Rf ${DIRPATH}/vim
+fi
 # Install vim-plug
 echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
 su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
@@ -226,7 +266,7 @@ if [ ${?} -eq 0 ]; then
     if [ ${?} -eq 0 ]; then
         # Install youcompleteme vim plugin
         echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
-        su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py" >> ${LOGFILE}
+        su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py --clangd-completer" >> ${LOGFILE}
     fi
     # Copy vim plugins config
     echo -e "${BOLD}${YELLOW}COPY VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}

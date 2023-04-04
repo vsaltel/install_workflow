@@ -42,3 +42,8 @@ alias me="make re"
 # Daemons
 alias sysa="systemctl list-units --type=service"
 alias syss="systemctl status"
+
+# Generate YCM extra file
+alias ycmgen="python2 ~/.vim/plugged/YCM-Generator/config_gen.py -F ycm"
+alias ccgen="python2 ~/.vim/plugged/YCM-Generator/config_gen.py -F cc"
+alias genc="ycmgen . ; ccgen ."

@@ -60,6 +60,7 @@ Plug 'alpertuna/vim-header' " Header
 Plug 'SirVer/ultisnips'
 Plug 'morhetz/gruvbox'
 Plug 'ludovicchabant/vim-gutentags'
+Plug 'jeaye/color_coded'
 call plug#end()
 
 filetype plugin indent on
@@ -185,6 +186,10 @@ if exists("*fugitive#statusline")
     set statusline+=%{fugitive#statusline()}
 endif
 
+"************************************************
+"" Plugin Configuration
+"************************************************
+
 " vim-airline
 let g:airline_theme = 'base16'
 let g:airline_section_x = ''
@@ -196,10 +201,20 @@ let g:airline#extensions#tagbar#enabled = 1
 let g:airline#extensions#hunks#enabled = 0
 let g:airline_skip_empty_sections = 1
 
+" NERDTree configuration
+let g:NERDTreeChDirMode=2
+let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
+let g:NERDTreeShowBookmarks=1
+let g:nerdtree_tabs_focus_on_files=1
+let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
+let g:NERDTreeWinSize = 25
+let g:NERDTreeMinimalUI=1
+let g:NERDTreeShowHidden=1
+
 "************************************************
 "" Abbreviations
 "************************************************
-"" no one is really happy until you have this shortcuts
 cnoreabbrev W! w!
 cnoreabbrev Q! q!
 cnoreabbrev Qall! qall!
@@ -211,38 +226,19 @@ cnoreabbrev W w
 cnoreabbrev Q q
 cnoreabbrev Qall qall
 
-"" NERDTree configuration
-let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
-let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
-let g:NERDTreeShowBookmarks=1
-let g:nerdtree_tabs_focus_on_files=1
-let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 25
-let g:NERDTreeMinimalUI=1
-let g:NERDTreeShowHidden=1
-nnoremap <silent> <F2> :NERDTree<CR>
-nnoremap <silent> <F3> :NERDTreeToggle<CR>
-
-" grep.vim
-nnoremap <silent> <leader>f :Rgrep<CR>
-let Grep_Default_Options = '-IR'
-let Grep_Skip_Files = '*.log *.db'
-let Grep_Skip_Dirs = '.git node_modules'
-
-" terminal emulation
-nnoremap <silent> <leader>sh :terminal<CR>
-
-
 "************************************************
 "" Commands
 "************************************************
+
 " remove trailing whitespaces
 command! FixWhitespace :%s/\s\+$//e
+" replace tabs for 4 spaces
+command! FixTabtospace :%s/\t/\ \ \ \ /e
 
 "************************************************
 "" Functions
 "************************************************
+
 if !exists('*s:setupWrapping')
   function s:setupWrapping()
     set wrap
@@ -299,30 +295,61 @@ set autoread
 "" Mappings
 "************************************************
 
-"" Header
+" Nerdtree
+nnoremap <silent> <F2> :NERDTree<CR>
+nnoremap <silent> <F3> :NERDTreeToggle<CR>
+
+" grep.vim
+nnoremap <silent> <leader>f :Rgrep<CR>
+let Grep_Default_Options = '-IR'
+let Grep_Skip_Files = '*.log *.db'
+let Grep_Skip_Dirs = '.git node_modules'
+
+" terminal emulation
+nnoremap <silent> <leader>sh :terminal<CR>
+
+" Header
 let g:header_field_author = "Valentin SALTEL"
 let g:header_field_author_email = "vsaltel@student.42.fr"
 noremap <F1> :AddHeader<CR>
 
-"" Invert default map
+" Invert default map
 noremap ^ #
 noremap # ^
 
-"" Jump Definition
+" Move fast verticaly
+noremap <S-C-j> <C-d>
+noremap <S-C-k> <C-u>
+
+" Move back words
+noremap <S-C-e> ge
+noremap <S-C-w> b
+
+" Jump Definition
 noremap ' <C-]>
 noremap <Leader>' <C-w><C-]>
 noremap ; <C-t>
 
-"" Split
+" Split
 noremap <Leader>h :<C-u>split<CR>
 noremap <Leader>v :<C-u>vsplit<CR>
 
-"" Tabs
-nnoremap <Tab> gt
-nnoremap <S-Tab> gT
-nnoremap <silent> <S-t> :tabnew<CR>
+" Tabs
+noremap <leader><Tab> gt
+noremap <leader><S-Tab> gT
+noremap <leader>t :tabnew<CR>
+noremap <leader>1 1gt
+noremap <leader>2 2gt
+noremap <leader>3 3gt
+noremap <leader>4 4gt
+noremap <leader>5 5gt
+noremap <leader>6 6gt
+noremap <leader>7 7gt
+noremap <leader>8 8gt
+noremap <leader>9 9gt
+noremap <leader>0 :tablast<CR>
 
-"" Opens an edit command with the path of the currently edited file filled in
+" Opens an edit command with the path of the currently edited file filled in
 noremap <Leader>e :e <C-R>=expand("%:p:h") . "/" <CR>
 
 " snippets
@@ -342,7 +369,8 @@ let g:ale_sign_column_always = 0
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 
-" YouCompleteMe
+" YouCompleteMe / Color_coded
+let g:ycm_global_ycm_extra_conf = ''
 let g:ycm_cache_omnifunc = 1
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_seed_identifiers_with_syntax = 0
@@ -352,7 +380,7 @@ let g:ycm_min_num_of_chars_for_completion = 2
 let g:ycm_min_num_identifier_candidate_chars = 0
 let g:ycm_max_num_candidates = 50
 set completeopt-=preview
-nnoremap <F8> :YcmGenerateConfig<CR>
+nnoremap <F8> :YcmGenerateConfig<CR>:CCGenerateConfig<CR>
 
 " Toggle gitgutter and ALE
 nnoremap <C-S-a> :GitGutterToggle<CR>:ALEToggle<CR>
@@ -391,7 +419,7 @@ noremap <C-j> <C-w>j
 noremap <C-k> <C-w>k
 noremap <C-l> <C-w>l
 noremap <C-h> <C-w>h
-noremap <TAB> <C-w><C-w>
+noremap <Tab> <C-w><C-w>
 
 "" Vmap for maintain Visual Mode after shifting > and <
 vmap < <gv

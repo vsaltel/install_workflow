@@ -48,10 +48,11 @@ SRC_DIR="${DIRPATH}/srcs"
 CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf"
 CONFIG_DIRS="zsh vim tmux"
 PACKET_MANAGER="apt-get -y"
-PACKAGES="libncurses5-dev libgtk2.0-dev libatk1.0-dev libcairo2-dev     \
+PACKAGES="build-essential libclang-3.9-dev libz-dev xz-utils            \
+    libncurses5-dev libgtk2.0-dev libatk1.0-dev libcairo2-dev           \
     libx11-dev libxpm-dev libxt-dev python2-dev python3-dev ruby-dev    \
-    lua5.2 liblua5.2-dev libperl-dev git gcc clang make cmake curl      \
-    python3 python3-pip zsh libncurses-dev exuberant-ctags tmux gawk"
+    clang make cmake curl python3 python3-pip zsh libncurses-dev        \
+    exuberant-ctags tmux gawk lua5.2 liblua5.2-dev libperl-dev git gcc"
 DELPACKAGES="vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
     vim-gui-common vim-nox"
 COPY_MODE=0
@@ -173,7 +174,6 @@ for FILE in ${CONFIG_FILES}; do
     chown ${DESTUSER}:${DESTUSER}   ${USERHOME}/.${FILE}
 done
 
-
 # Install shell
 echo -e "${BOLD}${YELLOW}INSTALL SHELL PLUGINS${NC}" | tee -a ${LOGFILE}
 mkdir -p ${USERHOME}/.zsh/plugins
@@ -265,8 +265,17 @@ if [ ${?} -eq 0 ]; then
     su ${DESTUSER} -c "vim +'PlugInstall --sync' +quitall" &>> ${LOGFILE}
     if [ ${?} -eq 0 ]; then
         # Install youcompleteme vim plugin
-        echo -e "${BOLD}${YELLOW}INSTALL YCM SERVER${NC}" | tee -a ${LOGFILE}
         su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py --clangd-completer" >> ${LOGFILE}
+
+        # Install color_coded
+        rm -f ${USERHOME}/.vim/plugged/color_coded/CMakeCache.txt
+        mkdir ${USERHOME}/.vim/plugged/color_coded/build
+        chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.vim/plugged/color_coded
+        cd ${USERHOME}/.vim/plugged/color_coded/build
+        su ${DESTUSER} -c "cmake .. -DDOWNLOAD_CLANG=0" >> ${LOGFILE}
+        su ${DESTUSER} -c "make && make install" >> ${LOGFILE}
+        su ${DESTUSER} -c "make clean && make clean_clang" >> ${LOGFILE}
+        cd - >> ${LOGFILE}
     fi
     # Copy vim plugins config
     echo -e "${BOLD}${YELLOW}COPY VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}

@@ -33,7 +33,7 @@ command_exists() {
 }
 
 ## PREREQUISITE ##
-PREREQUISITE="bash dirname getent tar"
+PREREQUISITE="bash dirname realpath getent tar"
 for PROG in ${PREREQUISITE}; do
     if ! command_exists ${PROG}; then
         echo -e "${BOLD}${RED}Need ${PROG} program${NC}"
@@ -42,7 +42,7 @@ for PROG in ${PREREQUISITE}; do
 done
 
 ## VARS         ##
-DIRPATH=$(dirname ${0})
+DIRPATH=$(realpath $(dirname ${0}))
 LOGFILE="${DIRPATH}/logs.txt"
 SRC_DIR="${DIRPATH}/srcs"
 CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf"
@@ -260,29 +260,35 @@ echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
 su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &>> ${LOGFILE}
 if [ ${?} -eq 0 ]; then
+    # Vim plugin directory path
+    VIM_PLUGIN_DIR="${USERHOME}/.vim/plugged"
     # Install vim plugins
     echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS${NC}" | tee -a ${LOGFILE}
     su ${DESTUSER} -c "vim +'PlugInstall --sync' +quitall" &>> ${LOGFILE}
     if [ ${?} -eq 0 ]; then
         # Install youcompleteme vim plugin
-        su ${DESTUSER} -c "python3 ${USERHOME}/.vim/plugged/YouCompleteMe/install.py --clangd-completer" >> ${LOGFILE}
+        if [ -e ${VIM_PLUGIN_DIR}/YouCompleteMe ]; then
+            su ${DESTUSER} -c "python3 ${VIM_PLUGIN_DIR}/YouCompleteMe/install.py --clangd-completer" >> ${LOGFILE}
+        fi
 
         # Install color_coded
-        rm -f ${USERHOME}/.vim/plugged/color_coded/CMakeCache.txt
-        mkdir ${USERHOME}/.vim/plugged/color_coded/build
-        chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.vim/plugged/color_coded
-        cd ${USERHOME}/.vim/plugged/color_coded/build
-        su ${DESTUSER} -c "cmake .. -DDOWNLOAD_CLANG=0" >> ${LOGFILE}
-        su ${DESTUSER} -c "make && make install" >> ${LOGFILE}
-        su ${DESTUSER} -c "make clean && make clean_clang" >> ${LOGFILE}
-        cd - >> ${LOGFILE}
+        if [ -e ${VIM_PLUGIN_DIR}/color_coded ]; then
+            rm -f ${VIM_PLUGIN_DIR}/color_coded/CMakeCache.txt
+            mkdir ${VIM_PLUGIN_DIR}/color_coded/build
+            chown -R ${DESTUSER}:${DESTUSER} ${VIM_PLUGIN_DIR}/color_coded
+            cd ${VIM_PLUGIN_DIR}/color_coded/build
+            su ${DESTUSER} -c "cmake .. -DDOWNLOAD_CLANG=0" &>> ${LOGFILE}
+            su ${DESTUSER} -c "make && make install" &>> ${LOGFILE}
+            su ${DESTUSER} -c "make clean && make clean_clang" &>> ${LOGFILE}
+            cd - >> ${LOGFILE}
+        fi
     fi
     # Copy vim plugins config
     echo -e "${BOLD}${YELLOW}COPY VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
     if [ -e ${DIRPATH}/srcs/c.snippets ]; then
-        mkdir -p ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
-        cp ${DIRPATH}/srcs/c.snippets ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets
-        chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.vim/plugged/ultisnips/UltiSnips
+        mkdir -p ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips
+        cp ${DIRPATH}/srcs/c.snippets ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips/c.snippets
+        chown -R ${DESTUSER}:${DESTUSER} ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips
     fi
 fi
 

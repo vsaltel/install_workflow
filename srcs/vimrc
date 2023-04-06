@@ -223,6 +223,24 @@ let g:NERDTreeWinSize = 25
 let g:NERDTreeMinimalUI=1
 let g:NERDTreeShowHidden=1
 
+" gutentags configuration
+let g:gutentags_add_default_project_roots = 0
+let g:gutentags_project_root = ['CMakeLists.txt', 'Makefile', '.git']
+let g:gutentags_cache_dir = expand('~/.cache/vim/ctags/')
+let g:gutentags_generate_on_new = 1
+let g:gutentags_generate_on_missing = 1
+let g:gutentags_generate_on_write = 1
+let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_ctags_extra_args = ['--tag-relative=yes', '--fields=+ailmnS']
+let g:gutentags_ctags_exclude = [
+    \ '*.git', '*.svg', '*.hg', '*/tests/*', 'build', 'dist', '*sites/*/files/*', 'bin', 'node_modules', 
+    \ 'bower_components', 'cache', 'compiled', 'docs', 'example', 'bundle', 'vendor', '*.md', '*-lock.json',
+    \ '*.lock', '*bundle*.js', '*build*.js', '*.json', '*.min.*', '*.map', '*.bak', '*.zip', '*.pyc', '*.class',
+    \ '*.sln', '*.Master', '*.csproj', '*.tmp', '*.csproj.user', '*.cache', '*.pdb', 'tags*', 'cscope.*',
+    \ '*.css', '*.less', '*.scss', '*.exe', '*.dll', '*.mp3', '*.ogg', '*.flac', '*.swp', '*.swo', '*.bmp',
+    \ '*.gif', '*.ico', '*.jpg', '*.png', '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
+    \ '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx', '.*rc*', '^.']
+
 " snippets
 let g:UltiSnipsExpandTrigger="<c-s>"
 let g:UltiSnipsJumpForwardTrigger="<c-f>"
@@ -280,10 +298,14 @@ cnoreabbrev Qall qall
 "************************************************
 "" Commands
 "************************************************
-" remove trailing whitespaces
+" Remove trailing whitespaces
 command! FixWhitespace :%s/\s\+$//e
-" replace tabs for 4 spaces
+
+" Replace tabs for 4 spaces
 command! FixTabtospace :%s/\t/\ \ \ \ /e
+
+" Clear tags
+command! -nargs=0 GutentagsClearCache call system('rm ' . g:gutentags_cache_dir . '/*')
 
 "************************************************
 "" Functions
@@ -340,18 +362,9 @@ augroup END
 "************************************************
 "" Plugin Mappings
 "************************************************
-" Generate File for YCM and Color_coded
-nnoremap <F8> :YcmGenerateConfig<CR>:CCGenerateConfig<CR>
 
 " Toggle gitgutter and ALE
 nnoremap <C-S-a> :GitGutterToggle<CR>:ALEToggle<CR>
-
-" Tagbar
-nmap <silent> <F4> :TagbarOpenAutoClose<CR>
-
-" Nerdtree
-nnoremap <silent> <F2> :NERDTree<CR>
-nnoremap <silent> <F3> :NERDTreeToggle<CR>
 
 " grep.vim
 nnoremap <silent> <leader>f :Rgrep<CR>
@@ -361,6 +374,19 @@ nnoremap <silent> <leader>sh :terminal<CR>
 
 " Header
 noremap <F1> :AddHeader<CR>
+
+" Nerdtree
+nnoremap <silent> <F2> :NERDTree<CR>
+nnoremap <silent> <F3> :NERDTreeToggle<CR>
+
+" Tagbar
+noremap <silent> <F4> :TagbarOpenAutoClose<CR>
+
+" Clean tags
+noremap <F7> :GutentagsClearCache<CR>
+
+" Generate File for YCM and Color_coded
+noremap <F8> :YcmGenerateConfig<CR>:CCGenerateConfig<CR>
 
 "************************************************
 "" Mappings

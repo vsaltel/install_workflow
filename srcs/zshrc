@@ -103,6 +103,17 @@ lfcd () {
         [ -d "$dir" ] && [ "$dir" != "$(pwd)" ] && cd "$dir"
     fi
 }
+
+# Generate conf for vim plugin in cache dir
+genc () {
+    fdir="${HOME}/.cache/vim/ycm"
+    if [ ! -e ${fdir} ]; then
+    ┆   mkdir -p ${fdir}
+    fi
+    python2 ~/.vim/plugged/YCM-Generator/config_gen.py -f -F ycm -o "${fdir}/ycm_extra_conf.py" .
+    python2 ~/.vim/plugged/YCM-Generator/config_gen.py -f -F cc -o "${HOME}/.color_coded" .
+}
+
 bindkey -s '^o' 'lfcd\n'
 
 # Edit line in vim with ctrl-e:

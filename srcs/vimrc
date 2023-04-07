@@ -214,7 +214,8 @@ let g:airline_skip_empty_sections = 1
 
 " NERDTree configuration
 let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.db$', '\.sqlite$', '__pycache__']
+let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.swp$', '\.swo$', '\.db$',
+    \ '\.sqlite$', '__pycache__']
 let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
 let g:NERDTreeShowBookmarks=1
 let g:nerdtree_tabs_focus_on_files=1
@@ -231,15 +232,15 @@ let g:gutentags_generate_on_new = 1
 let g:gutentags_generate_on_missing = 1
 let g:gutentags_generate_on_write = 1
 let g:gutentags_generate_on_empty_buffer = 0
-let g:gutentags_ctags_extra_args = ['--tag-relative=yes', '--fields=+ailmnS']
+let g:gutentags_ctags_extra_args = ['--tag-relative=yes', '--fields=+aimS']
 let g:gutentags_ctags_exclude = [
-    \ '*.git', '*.svg', '*.hg', '*/tests/*', 'build', 'dist', '*sites/*/files/*', 'bin', 'node_modules', 
-    \ 'bower_components', 'cache', 'compiled', 'docs', 'example', 'bundle', 'vendor', '*.md', '*-lock.json',
-    \ '*.lock', '*bundle*.js', '*build*.js', '*.json', '*.min.*', '*.map', '*.bak', '*.zip', '*.pyc', '*.class',
-    \ '*.sln', '*.Master', '*.csproj', '*.tmp', '*.csproj.user', '*.cache', '*.pdb', 'tags*', 'cscope.*',
-    \ '*.css', '*.less', '*.scss', '*.exe', '*.dll', '*.mp3', '*.ogg', '*.flac', '*.swp', '*.swo', '*.bmp',
-    \ '*.gif', '*.ico', '*.jpg', '*.png', '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
-    \ '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx', '.*rc*', '^.']
+    \ 'build*', '*.git', '*.swp', '*.swo', '*.log*', '*.o', 'objs', '*.a', '*.txt',
+    \ 'Makefile', 'tags', '*.yml', '*.pcap', '*.pcapng', '*.sh', '*.md',
+    \ '*.lock', '*.json', '*.map', '*.bak', '*.zip', '*.pyc', '*.class', '*.sln',
+    \ '*.Master', '*.csproj', '*.tmp', '*.csproj.user', '*.cache', '*.pdb', 'cscope.*',
+    \ '*.css', '*.less', '*.scss', '*.exe', '*.dll', '*.ogg', '*.rar', '*.zip',
+    \ '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2', '*.pdf', '*.doc', '*.docx',
+    \ '*.ppt', '*.pptx']
 
 " snippets
 let g:UltiSnipsExpandTrigger="<c-s>"
@@ -259,7 +260,7 @@ let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 
 " YouCompleteMe
-let g:ycm_global_ycm_extra_conf = ''
+let g:ycm_global_ycm_extra_conf = '~/.cache/vim/ycm/ycm_extra_conf.py'
 let g:ycm_cache_omnifunc = 1
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_seed_identifiers_with_syntax = 0

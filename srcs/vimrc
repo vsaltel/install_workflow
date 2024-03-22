@@ -61,6 +61,9 @@ Plug 'SirVer/ultisnips'
 Plug 'morhetz/gruvbox'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'jeaye/color_coded'
+Plug 'wincent/command-t'
+Plug 'bogado/file-line' " Little plugin that allow this : vim file:linenumber
+Plug 'skywind3000/asyncrun.vim'
 call plug#end()
 
 filetype plugin indent on
@@ -206,9 +209,11 @@ let g:airline_theme = 'base16'
 let g:airline_section_x = ''
 let g:airline_section_y = ''
 let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#branch#displayed_head_limit = 10
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tagbar#enabled = 1
+let g:airline#extensions#nerdtree#enabled = 1
 let g:airline#extensions#hunks#enabled = 0
 let g:airline_skip_empty_sections = 1
 
@@ -218,11 +223,24 @@ let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.swp$', '\.swo
     \ '\.sqlite$', '__pycache__']
 let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
 let g:NERDTreeShowBookmarks=1
-let g:nerdtree_tabs_focus_on_files=1
 let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 25
+let g:NERDTreeWinSize = 30
 let g:NERDTreeMinimalUI=1
 let g:NERDTreeShowHidden=1
+
+" https://github.com/jistr/vim-nerdtree-tabs
+let g:nerdtree_tabs_open_on_gui_startup=1
+let g:nerdtree_tabs_open_on_console_startup=0
+let g:nerdtree_tabs_no_startup_for_diff=1
+let g:nerdtree_tabs_smart_startup_focus=1
+let g:nerdtree_tabs_open_on_new_tab=1
+let g:nerdtree_tabs_meaningful_tab_names=1
+let g:nerdtree_tabs_autoclose=0
+let g:nerdtree_tabs_synchronize_view=0
+let g:nerdtree_tabs_synchronize_focus=1
+let g:nerdtree_tabs_focus_on_files=1
+let g:nerdtree_tabs_startup_cd=1
+let g:nerdtree_tabs_autofind=0
 
 " gutentags configuration
 let g:gutentags_add_default_project_roots = 0
@@ -251,6 +269,10 @@ let g:UltiSnipsEditSplit="vertical"
 " gitgutter
 let g:gitgutter_enabled = 0
 
+" CommandT
+let g:CommandTMaxFiles=200000
+let g:CommandTSuppressMaxFilesWarning=1
+
 " ale
 let g:ale_enabled = 0
 let g:ale_completion_enabled = 1
@@ -261,6 +283,8 @@ let g:ale_sign_warning = '--'
 
 " YouCompleteMe
 let g:ycm_global_ycm_extra_conf = '~/.cache/vim/ycm/ycm_extra_conf.py'
+let g:ycm_key_list_select_completion = ['`']
+let g:ycm_key_list_previous_completion = ['~']
 let g:ycm_cache_omnifunc = 1
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_seed_identifiers_with_syntax = 0
@@ -281,6 +305,9 @@ let g:header_field_author_email = "vsaltel@student.42.fr"
 
 " Tagbar
 let g:tagbar_autofocus = 1
+
+" AsyncRun
+let g:asyncrun_open = 15
 
 "************************************************
 "" Abbreviations
@@ -364,24 +391,27 @@ augroup END
 "" Plugin Mappings
 "************************************************
 
-" Toggle gitgutter and ALE
-nnoremap <C-S-a> :GitGutterToggle<CR>:ALEToggle<CR>
-
 " grep.vim
 nnoremap <silent> <leader>f :Rgrep<CR>
 
 " terminal emulation
 nnoremap <silent> <leader>sh :terminal<CR>
 
-" Header
-noremap <F1> :AddHeader<CR>
+" AsyncRun
+nnoremap <F1> :AsyncRun /bin/zsh -i -c ""<left>
 
 " Nerdtree
-nnoremap <silent> <F2> :NERDTree<CR>
-nnoremap <silent> <F3> :NERDTreeToggle<CR>
+nnoremap <silent> <F2> :NERDTreeToggle<CR>
+nnoremap <silent> <F3> :NERDTreeFind<CR>
 
 " Tagbar
 noremap <silent> <F4> :TagbarOpenAutoClose<CR>
+
+" Toggle gitgutter and ALE
+nnoremap <F5> :GitGutterToggle<CR>:ALEToggle<CR>
+
+" Header
+noremap <F6> :AddHeader<CR>
 
 " Clean tags
 noremap <F7> :GutentagsClearCache<CR>
@@ -419,9 +449,18 @@ noremap ' <C-]>
 noremap <Leader>' <C-w><C-]>
 noremap ; <C-t>
 
+" Open file under cursor
+noremap glf :vertical wincmd f<CR>
+noremap gnf <C-w>f
+noremap gtf <C-w>gf
+
 " Split
 noremap <Leader>h :<C-u>split<CR>
 noremap <Leader>v :<C-u>vsplit<CR>
+
+" CommandT
+let g:CommandTPreferredImplementation='ruby'
+noremap <silent> <leader>/ :CommandT<CR>
 
 " Tabs
 noremap <leader><Tab> gt
@@ -469,8 +508,8 @@ vnoremap K :m '<-2<CR>gv=gv
 "************************************************
 "" Custom Filtetype configs
 "************************************************
-autocmd FileType c setlocal tabstop=4 shiftwidth=4 expandtab
-autocmd FileType cpp setlocal tabstop=4 shiftwidth=4 expandtab
+" autocmd FileType c setlocal tabstop=4 shiftwidth=4 expandtab
+" autocmd FileType cpp setlocal tabstop=4 shiftwidth=4 expandtab
 
 "************************************************
 "" Convenience variables

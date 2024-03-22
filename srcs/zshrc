@@ -20,12 +20,13 @@ fblack="%F{0}"
 fred="%F{9}"
 fgreen="%F{76}"
 forange="%F{214}"
-fgrey="%F{236}"
+fgrey="%F{237}"
 bblack="%K{0}"
 bred="%K{9}"
 bgreen="%K{76}"
 borange="%K{214}"
-bgrey="%K{236}"
+bgrey="%K{237}"
+left='%m | %~'
 
 # Enabling and setting git info var to be used in prompt config.
 autoload -Uz vcs_info
@@ -71,6 +72,7 @@ precmd_functions+=(prompt)
 HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE=${HOME}/.zsh_history
+setopt inc_append_history_time
 
 # Basic auto/tab complete:
 autoload -U compinit
@@ -108,7 +110,7 @@ lfcd () {
 genc () {
     fdir="${HOME}/.cache/vim/ycm"
     if [ ! -e ${fdir} ]; then
-    ┆   mkdir -p ${fdir}
+        mkdir -p ${fdir}
     fi
     python2 ~/.vim/plugged/YCM-Generator/config_gen.py -f -F ycm -o "${fdir}/ycm_extra_conf.py" .
     python2 ~/.vim/plugged/YCM-Generator/config_gen.py -f -F cc -o "${HOME}/.color_coded" .
@@ -119,7 +121,7 @@ bindkey -s '^o' 'lfcd\n'
 # Edit line in vim with ctrl-e:
 autoload edit-command-line; zle -N edit-command-line
 bindkey '^e' edit-command-line
-#
+
 # Load aliases
 if [ -f ${HOME}/.zsh_aliases ]; then
     source ${HOME}/.zsh_aliases

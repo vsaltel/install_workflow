@@ -1,20 +1,20 @@
 ## Aliases      ##
 
-# If color support enable
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls="ls --color=auto"
-    alias grep="grep --color"
-fi
+# Vars
+SSHK="/home/valentins/work/ssh_key"
 
-# Git
-alias ga="git add"
-alias gc="git commit"
-alias gp="git push"
-alias gst="git status"
-alias gco="git checkout"
+# Hosts
+alias EVA="sshpass -p 'adminadmin' ssh admin@192.168.122.10"
+alias BUILD="sshpass -p 'build' ssh build@192.168.122.11"
+
+# Color
+alias ls="ls --color=auto"
+alias grep="grep --color"
 
 # Grep
+alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
+alias egrep='grep -E --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
+alias fgrep='grep -F --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
 alias gr="grep -R"
 alias g="grep"
 
@@ -25,6 +25,9 @@ alias l="ls -lakvNF --group-directories-first -I '..' -I '.'"
 alias f="find -name"
 alias fn="find -type f -name"
 alias fd="find -type d -name"
+alias fi="find -iname"
+alias fni="find -type f -iname"
+alias fdi="find -type d -iname"
 alias fp="find -path"
 
 # Rm
@@ -42,3 +45,139 @@ alias me="make re"
 # Daemons
 alias sysa="systemctl list-units --type=service"
 alias syss="systemctl status"
+
+# History
+alias histupd="fc -RI"
+
+alias g='git'
+alias ga="git add"
+alias gaa='git add --all'
+alias gau='git add --update'
+alias gav='git add --verbose'
+alias gb='git branch'
+alias gbD='git branch --delete --force'
+alias gba='git branch --all'
+alias gbd='git branch --delete'
+alias gbv='git branch -vv'
+alias gbl='git blame -b -w'
+alias gcn='git clean --force -dfx'
+alias gst='git status'
+alias gstsb='git status --short --branch'
+alias gsts='git status --short'
+alias gbnm='git branch --no-merged'
+alias gbr='git branch --remote'
+alias gbs='git bisect'
+alias gbsb='git bisect bad'
+alias gbsg='git bisect good'
+alias gbsr='git bisect reset'
+alias gbss='git bisect start'
+alias gc='git commit --verbose'
+alias gco="git checkout"
+alias gcb='git checkout -b'
+alias gcor='git checkout --recurse-submodules'
+alias gcl='git clone'
+alias gclr='git clone --recurse-submodules'
+alias gcp='git cherry-pick'
+alias gcpa='git cherry-pick --abort'
+alias gcpc='git cherry-pick --continue'
+alias gcs='git commit --gpg-sign'
+alias gcsm='git commit --signoff --message'
+alias gcss='git commit --gpg-sign --signoff'
+alias gcssm='git commit --gpg-sign --signoff --message'
+alias gd='git diff'
+alias gdca='git diff --cached'
+alias gdct='git describe --tags $(git rev-list --tags --max-count=1)'
+alias gdcw='git diff --cached --word-diff'
+alias gds='git diff --staged'
+alias gdt='git diff-tree --no-commit-id --name-only -r'
+alias gdup='git diff @{upstream}'
+alias gdw='git diff --word-diff'
+alias gf='git fetch'
+alias gfa='git fetch --all --prune --jobs=10'
+alias gfg='git ls-files | grep'
+alias gfo='git fetch origin'
+alias ggsup='git branch --set-upstream-to=origin/$(git_current_branch)'
+alias ghh='git help'
+alias gignore='git update-index --assume-unchanged'
+alias gignored='git ls-files -v | grep "^[[:lower:]]"'
+alias glg='git log --stat'
+alias glgg='git log --graph'
+alias glgm='git log --graph --max-count=10'
+alias glgp='git log --stat --patch'
+alias glo='git log --oneline --decorate'
+alias glog='git log --oneline --decorate --graph'
+alias gloga='git log --oneline --decorate --graph --all'
+alias glol='git log --graph --pretty='\''%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'
+alias glols='git log --graph --pretty='\''%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset'\'' --stat'
+alias gluc='git pull upstream $(git_current_branch)'
+alias glum='git pull upstream $(git_main_branch)'
+alias gm='git merge'
+alias gma='git merge --abort'
+alias gmom='git merge origin/$(git_main_branch)'
+alias gms='git merge --squash'
+alias gmtl='git mergetool --no-prompt'
+alias gmtlvim='git mergetool --no-prompt --tool=vimdiff'
+alias gmum='git merge upstream/$(git_main_branch)'
+alias gp="git push"
+alias gpd='git push --dry-run'
+alias gpf='git push --force-with-lease'
+alias gpoat='git push origin --all && git push origin --tags'
+alias gpod='git push origin --delete'
+alias gpr='git pull --rebase'
+alias gpsup='git push --set-upstream origin $(git_current_branch)'
+alias gpsupf='git push --set-upstream origin $(git_current_branch) --force-with-lease'
+alias gpv='git push --verbose'
+# alias gr='git remote'
+alias gra='git remote add'
+alias grb='git rebase'
+alias grba='git rebase --abort'
+alias grbc='git rebase --continue'
+alias grbi='git rebase --interactive'
+alias grbs='git rebase --skip'
+alias grev='git revert'
+alias grh='git reset'
+alias grhh='git reset --hard'
+alias groh='git reset origin/$(git_current_branch) --hard'
+alias grm='git rm'
+alias grmc='git rm --cached'
+alias grmv='git remote rename'
+alias grrm='git remote remove'
+alias grs='git restore'
+alias grss='git restore --source'
+alias grst='git restore --staged'
+alias grt='cd "$(git rev-parse --show-toplevel || echo .)"'
+alias gru='git reset --'
+alias grup='git remote update'
+alias grv='git remote --verbose'
+alias gsd='git svn dcommit'
+alias gsh='git show'
+alias gsi='git submodule init'
+alias gsu='git submodule update'
+alias gsps='git show --pretty=short --show-signature'
+alias gsr='git svn rebase'
+alias gsta='git stash push'
+alias gstaa='git stash apply'
+alias gstall='git stash --all'
+alias gstc='git stash clear'
+alias gstd='git stash drop'
+alias gstl='git stash list'
+alias gstp='git stash pop'
+alias gsts='git stash show --text'
+alias gsw='git switch'
+alias gswc='git switch --create'
+alias gswd='git switch $(git_develop_branch)'
+alias gswm='git switch $(git_main_branch)'
+alias gts='git tag --sign'
+alias gtv='git tag | sort -V'
+alias gunignore='git update-index --no-assume-unchanged'
+alias gupa='git pull --rebase --autostash'
+alias gupav='git pull --rebase --autostash --verbose'
+alias gupom='git pull --rebase origin $(git_main_branch)'
+alias gupomi='git pull --rebase=interactive origin $(git_main_branch)'
+alias gupv='git pull --rebase --verbose'
+alias gwch='git whatchanged -p --abbrev-commit --pretty=medium'
+alias gwt='git worktree'
+alias gwta='git worktree add'
+alias gwtls='git worktree list'
+alias gwtmv='git worktree move'
+alias gwtrm='git worktree remove'

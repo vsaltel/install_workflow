@@ -49,21 +49,30 @@ Plug 'tpope/vim-rhubarb' " required by fugitive to :Gbrowse
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'airblade/vim-gitgutter'
-Plug 'vim-scripts/grep.vim'
-Plug 'vim-scripts/CSApprox'
+Plug 'vim-scripts/grep.vim' " grep in quickfix
+Plug 'vim-scripts/CSApprox' " colorscheme gvim compatible
 Plug 'majutsushi/tagbar'
 Plug 'dense-analysis/ale'
 Plug 'Yggdroot/indentLine'
 Plug 'ycm-core/YouCompleteMe' " Completion
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
-Plug 'alpertuna/vim-header' " Header
 Plug 'SirVer/ultisnips'
 Plug 'morhetz/gruvbox'
 Plug 'ludovicchabant/vim-gutentags'
-Plug 'jeaye/color_coded'
 Plug 'wincent/command-t'
-Plug 'bogado/file-line' " Little plugin that allow this : vim file:linenumber
+Plug 'bogado/file-line' " open file:line syntax : vim file:linenumber
 Plug 'skywind3000/asyncrun.vim'
+Plug 'ryanoasis/vim-devicons' " Icons
+Plug 'sheerun/vim-polyglot' " Syntax detection
+Plug 'lambdalisue/fern.vim'
+Plug 'lambdalisue/fern-git-status.vim'
+Plug 'lambdalisue/glyph-palette.vim'
+Plug 'lambdalisue/nerdfont.vim'
+Plug 'lambdalisue/fern-renderer-nerdfont.vim'
+Plug 'lambdalisue/fern-hijack.vim'
+
+" Test startify
+Plug 'mhinz/vim-startify'
 call plug#end()
 
 filetype plugin indent on
@@ -71,10 +80,13 @@ filetype plugin indent on
 "************************************************
 "" Basic Setup
 "************************************************
+" No fix end of line
+set nofixeol
+
 " Encoding
-set encoding=utf-8
-set fileencoding=utf-8
-set fileencodings=utf-8
+set encoding=UTF-8
+set fileencoding=UTF-8
+set fileencodings=UTF-8
 set ttyfast
 
 " Fix backspace indent
@@ -85,6 +97,9 @@ set tabstop=4
 set softtabstop=0
 set shiftwidth=4
 set expandtab
+
+" Open diff in vertical split
+set diffopt+=vertical
 
 " Map leader to ,
 let mapleader=','
@@ -113,12 +128,17 @@ syntax on
 set ruler
 set number
 set rnu
+set cursorline
 
 let no_buffers_menu=1
 
 " colorscheme
 silent! colorscheme gruvbox
 set background=dark
+
+" Comment highlight
+highlight Comment ctermfg=208
+highlight Comment cterm=italic
 
 " Better command line completion
 set wildmenu
@@ -136,7 +156,7 @@ set gfn=Monospace\ 10
 
 if has("gui_running")
     if has("gui_mac") || has("gui_macvim")
-        set guifont=Menlo:h12
+        set guifont=DroidSansMono\ Nerd\ Font\ 11
         set transparency=7
     endif
 else
@@ -208,25 +228,28 @@ endif
 let g:airline_theme = 'base16'
 let g:airline_section_x = ''
 let g:airline_section_y = ''
-let g:airline#extensions#branch#enabled = 1
-let g:airline#extensions#branch#displayed_head_limit = 10
-let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#buffer_min_count = 2
+let g:airline#extensions#tabline#show_buffers = 0
+let g:airline#extensions#tabline#show_splits = 0
+let g:airline#extensions#tabline#show_tabs = 1
+let g:airline#extensions#tabline#show_tab_nr = 0
+let g:airline#extensions#tabline#show_tab_type = 0
+let g:airline#extensions#tabline#close_symbol = '×'
+let g:airline#extensions#tabline#show_close_button = 0
+let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#branch#displayed_head_limit = 20
+let g:airline#extensions#branch#format = 2
+let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tagbar#enabled = 1
 let g:airline#extensions#nerdtree#enabled = 1
 let g:airline#extensions#hunks#enabled = 0
 let g:airline_skip_empty_sections = 1
 
-" NERDTree configuration
-let g:NERDTreeChDirMode=2
-let g:NERDTreeIgnore=['node_modules','\.rbc$', '\~$', '\.pyc$', '\.swp$', '\.swo$', '\.db$',
-    \ '\.sqlite$', '__pycache__']
-let g:NERDTreeSortOrder=['^__\.py$', '\/$', '*', '\.swp$', '\.bak$', '\~$']
-let g:NERDTreeShowBookmarks=1
-let g:NERDTreeMapOpenInTabSilent = '<RightMouse>'
-let g:NERDTreeWinSize = 30
-let g:NERDTreeMinimalUI=1
-let g:NERDTreeShowHidden=1
+" Vim-Startify
+let g:startify_change_to_dir = 0
+let g:startify_change_to_vcs_root = 0
 
 " https://github.com/jistr/vim-nerdtree-tabs
 let g:nerdtree_tabs_open_on_gui_startup=1
@@ -244,7 +267,7 @@ let g:nerdtree_tabs_autofind=0
 
 " gutentags configuration
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['CMakeLists.txt', 'Makefile', '.git']
+let g:gutentags_project_root = ['.git', 'README', 'boost.css', 'alarms.pl', 'AGENT.txt']
 let g:gutentags_cache_dir = expand('~/.cache/vim/ctags/')
 let g:gutentags_generate_on_new = 1
 let g:gutentags_generate_on_missing = 1
@@ -281,8 +304,12 @@ let g:ale_sign_column_always = 0
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
 
+" fern
+let g:fern#renderer = "nerdfont"
+
 " YouCompleteMe
 let g:ycm_global_ycm_extra_conf = '~/.cache/vim/ycm/ycm_extra_conf.py'
+let g:ycm_show_diagnostics_ui = 0
 let g:ycm_key_list_select_completion = ['`']
 let g:ycm_key_list_previous_completion = ['~']
 let g:ycm_cache_omnifunc = 1
@@ -298,10 +325,6 @@ let g:ycm_max_num_candidates = 50
 let Grep_Default_Options = '-IR'
 let Grep_Skip_Files = '*.log *.db'
 let Grep_Skip_Dirs = '.git node_modules'
-
-" Header
-let g:header_field_author = "Valentin SALTEL"
-let g:header_field_author_email = "vsaltel@student.42.fr"
 
 " Tagbar
 let g:tagbar_autofocus = 1
@@ -349,17 +372,11 @@ endif
 "************************************************
 "" Autocmd Rules
 "************************************************
-" Set NERDTree bookmark map
-augroup vimrc-nerdtree-bookmark
-    autocmd!
-    autocmd Filetype nerdtree nnoremap <buffer> b :Bookmark<CR>
-augroup END
-
-" Start NERDTree when Vim is started without file arguments.
-augroup vimrc-nerdtree-fromstart
-    autocmd!
-    autocmd StdinReadPre * let s:std_in=1
-    autocmd VimEnter * if argc() == 0 && !exists('s:std_in') | NERDTree | endif
+" Icon on fern
+augroup my-glyph-palette
+	autocmd!
+	autocmd FileType fern call glyph_palette#apply()
+	autocmd FileType nerdtree,fern call glyph_palette#apply()
 augroup END
 
 " The PC is fast enough, do syntax highlight syncing from start unless 200 lines
@@ -390,7 +407,6 @@ augroup END
 "************************************************
 "" Plugin Mappings
 "************************************************
-
 " grep.vim
 nnoremap <silent> <leader>f :Rgrep<CR>
 
@@ -398,26 +414,30 @@ nnoremap <silent> <leader>f :Rgrep<CR>
 nnoremap <silent> <leader>sh :terminal<CR>
 
 " AsyncRun
-nnoremap <F1> :AsyncRun /bin/zsh -i -c ""<left>
+nnoremap <F1> :AsyncRun /bin/zsh -i -c 'ag '<left>
 
-" Nerdtree
-nnoremap <silent> <F2> :NERDTreeToggle<CR>
-nnoremap <silent> <F3> :NERDTreeFind<CR>
+" Fern
+nnoremap <silent> <F2> :Fern . -drawer -toggle<CR>
+nnoremap <silent> <F3> :Fern %:h -reveal=% -drawer -toggle<CR>
 
 " Tagbar
 noremap <silent> <F4> :TagbarOpenAutoClose<CR>
 
-" Toggle gitgutter and ALE
-nnoremap <F5> :GitGutterToggle<CR>:ALEToggle<CR>
+" Toggle gitgutter
+nnoremap <silent> <F5> :GitGutterToggle<CR>
 
-" Header
-noremap <F6> :AddHeader<CR>
+" Toggle ALE
+nnoremap <silent> <F6> :ALEToggle<CR>
 
 " Clean tags
 noremap <F7> :GutentagsClearCache<CR>
 
 " Generate File for YCM and Color_coded
 noremap <F8> :YcmGenerateConfig<CR>:CCGenerateConfig<CR>
+
+command! -nargs=1 Silent
+			\   execute 'silent !' . <q-args>
+			\ | execute 'redraw!'
 
 "************************************************
 "" Mappings
@@ -508,17 +528,19 @@ vnoremap K :m '<-2<CR>gv=gv
 "************************************************
 "" Custom Filtetype configs
 "************************************************
-" autocmd FileType c setlocal tabstop=4 shiftwidth=4 expandtab
-" autocmd FileType cpp setlocal tabstop=4 shiftwidth=4 expandtab
+autocmd FileType c setlocal tabstop=4 shiftwidth=4 expandtab
+autocmd FileType cpp setlocal tabstop=4 shiftwidth=4 expandtab
 
 "************************************************
 "" Convenience variables
 "************************************************
 " vim-airline
-let g:airline#extensions#tabline#enabled = 0
+let g:airline#extensions#tabline#enabled = 1
 if !exists('g:airline_symbols')
     let g:airline_symbols = {}
 endif
+
+let g:airline_powerline_fonts=1
 
 if !exists('g:airline_powerline_fonts')
     let g:airline_left_sep = ''
@@ -550,6 +572,3 @@ let g:airline_mode_map = {
     \ 'n': 'N', 'multi': 'M', 'ni': 'N', 'no': 'N',
     \ 'R': 'R', 'Rv': 'R', 's': 'S', 'S': 'S', '': 'S',
     \ 't': 'T', 'v': 'V', 'V': 'V', '': 'V' }
-
-let g:airline_filetype_overrides = {
-    \ 'nerdtree': [ get(g:, 'NERDTreeStatusline', 'NTree'), '' ] }

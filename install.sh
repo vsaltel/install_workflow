@@ -435,6 +435,7 @@ if ask_install "nvim" && ask_overwrite_bin "nvim"; then
     git clone -q https://github.com/neovim/neovim ${DIRPATH}/nvim 2>> ${LOGFILE}
     if [ -e ${DIRPATH}/nvim ]; then
         cd ${DIRPATH}/nvim
+		make CMAKE_BUILD_TYPE=RelWithDebInfo
         make install &>> ${LOGFILE}
         if [ ! -e /usr/local/bin/nvim ]; then
             echo -e "${BOLD}${RED}${PACK} NVIM INSTALL FAILED${NC}" | tee -a ${LOGFILE}
@@ -453,7 +454,7 @@ if ask_install "nvim" && ask_overwrite_bin "nvim"; then
     echo -e "${BOLD}${GREEN}NVIM INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
 fi
 
-## Vim config setup
+## Nvim config setup
 if command_exists "nvim" && ask_install "nvim config" && ask_overwrite_conf "NVim" "${USERHOME}/.config/nvim"; then
     if [ ${NVIM_INSTALLED} != "yes" ]; then
         # Install nvim packages

@@ -1,3 +1,4 @@
 return {
-	"stevearc/dressing.nvim"
+	"stevearc/dressing.nvim",
+	"bogado/file-line",
 }

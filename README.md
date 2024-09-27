@@ -3,9 +3,11 @@
 My workflow installation.
 
 It contains :
-  - bash config
+  - zsh config
   - vim config
+  - nvim config
   - tmux config
+  - other tools
   
 ## Build
 

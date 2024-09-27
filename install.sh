@@ -125,7 +125,7 @@ done
 DIRPATH=$(realpath $(dirname ${0}))
 LOGFILE="${DIRPATH}/logs.txt"
 SRC_DIR="${DIRPATH}/srcs"
-CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf"
+CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf tmux.terminfo"
 CONFIG_DIRS="zsh vim tmux"
 PACKET_MANAGER="apt-get -y"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
@@ -136,6 +136,7 @@ VIM_REQUIRED_PACKAGES="libclang-3.9-dev zlib1g-dev libncurses5-dev     \
     libxt-dev python2-dev python3-dev ruby-dev libncurses-dev liblua5.2-dev \
     libperl-dev xz-utils build-essential lua5.2 clang cmake curl python3    \
     python3-pip exuberant-ctags git"
+NVIM_REQUIRED_PACKAGES=""
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
 FONT_NAME="hack"
@@ -306,7 +307,9 @@ if ask_install "tmux"; then
 
         # Copy new tmux conf
         echo -e "${BOLD}${YELLOW}COPY TMUX CONF${NC}" | tee -a ${LOGFILE}
+		mkdir -p ${USERHOME}/.tmux
         cp ${SRC_DIR}/tmux.conf ${USERHOME}/.tmux.conf
+        cp ${SRC_DIR}/tmux.terminfo ${USERHOME}/.tmux/tmux.terminfo
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
 
         # Install tpm
@@ -327,7 +330,7 @@ fi
 if ask_install "vim" && ask_overwrite_bin "vim"; then
     # Uninstall old vim packages
     echo -e "${BOLD}${YELLOW}UNINSTALL VIM PACKAGES:${NC}" | tee -a ${LOGFILE}
-    VIM_UNINSTALL_PACKAGES="gvim vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
+    VIM_UNINSTALL_PACKAGES="gvim neovim vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
         vim-gui-common vim-nox"
     uninstall_packages "${VIM_UNINSTALL_PACKAGES}"
 
@@ -414,6 +417,59 @@ if command_exists "vim" && ask_install "vim config" && ask_overwrite_conf "Vim" 
         fi
     fi
     echo -e "${BOLD}${GREEN}VIM CONFIG INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
+fi
+
+## Nvim binary setup
+if ask_install "nvim" && ask_overwrite_bin "nvim"; then
+    # Uninstall old vim packages
+    echo -e "${BOLD}${YELLOW}UNINSTALL NVIM PACKAGES:${NC}" | tee -a ${LOGFILE}
+    VIM_UNINSTALL_PACKAGES="gvim neovim vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
+        vim-gui-common vim-nox"
+    uninstall_packages "${VIM_UNINSTALL_PACKAGES}"
+
+    # Install nvim packages
+    install_packages "${NVIM_REQUIRED_PACKAGES}"
+
+    # Install nvim
+    echo -e "${BOLD}${YELLOW}INSTALL VIM${NC}" | tee -a ${LOGFILE}
+    git clone -q https://github.com/neovim/neovim ${DIRPATH}/nvim 2>> ${LOGFILE}
+    if [ -e ${DIRPATH}/nvim ]; then
+        cd ${DIRPATH}/nvim
+        make install &>> ${LOGFILE}
+        if [ ! -e /usr/local/bin/nvim ]; then
+            echo -e "${BOLD}${RED}${PACK} NVIM INSTALL FAILED${NC}" | tee -a ${LOGFILE}
+            exit 6
+        fi
+        if command_exists update-alternatives; then
+            update-alternatives --install /usr/bin/editor editor /usr/local/bin/nvim 1 &>> ${LOGFILE}
+            update-alternatives --set editor /usr/local/bin/nvim &>> ${LOGFILE}
+            update-alternatives --install /usr/bin/vi vi /usr/local/bin/nvim 1 &>> ${LOGFILE}
+            update-alternatives --set vi /usr/local/bin/nvim &>> ${LOGFILE}
+        fi
+        cd - >> ${LOGFILE}
+        rm -Rf ${DIRPATH}/nvim
+    fi
+    NVIM_INSTALLED="yes"
+    echo -e "${BOLD}${GREEN}NVIM INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
+fi
+
+## Vim config setup
+if command_exists "nvim" && ask_install "nvim config" && ask_overwrite_conf "NVim" "${USERHOME}/.config/nvim"; then
+    if [ ${NVIM_INSTALLED} != "yes" ]; then
+        # Install nvim packages
+        install_packages "${NVIM_REQUIRED_PACKAGES}"
+        echo -e "${BOLD}${RED}PROBABLY NEED TO REINSTALL VIM${NC}" | tee -a ${LOGFILE}
+    fi
+    # Remove old vim conf
+    echo -e "${BOLD}${YELLOW}REMOVE OLD VIM CONF${NC}" | tee -a ${LOGFILE}
+    if [ -e ${USERHOME}/.config/nvim ]; then unlink ${USERHOME}/.config/nvim && rm -rf ${USERHOME}/.config/nvim &>> ${LOGFILE}; fi
+
+    # Copy new vim conf
+    echo -e "${BOLD}${YELLOW}CREATE LINK TO CONFIG${NC}" | tee -a ${LOGFILE}
+	ln -s ${SRC_DIR}/nvim ${USERHOME}/.config/nvim
+    chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.config/nvim
+
+    echo -e "${BOLD}${GREEN}NVIM CONFIG INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
 fi
 
 echo -e "${BOLD}${GREEN}INSTALLATION IS COMPLETE !${NC}" | tee -a ${LOGFILE}

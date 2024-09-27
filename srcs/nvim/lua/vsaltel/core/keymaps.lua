@@ -1,0 +1,58 @@
+vim.g.mapleader = ","
+
+local keymap = vim.keymap
+
+-- Move fast verticaly
+keymap.set({"n", "v"}, "J", "<C-d>")
+keymap.set({"n", "v"}, "K", "<C-u>")
+
+-- Jump Definition
+keymap.set("n", "'", "<C-]>")
+keymap.set("n", "<leader>'", "<C-w><C-]>")
+keymap.set("n", ";", "<C-t>")
+
+-- Open file under cursor
+keymap.set("n", "glf", "<cmd>vertical wincmd f<CR>")
+keymap.set("n", "gnf", "<C-w>f")
+keymap.set("n", "gtf", "<C-w>gf")
+
+-- Split
+keymap.set("n", "<leader>h", "<cmd>split<CR>")
+keymap.set("n", "<leader>v", "<cmd>vsplit<CR>")
+
+-- Tabs
+keymap.set("n", "<leader><Tab>", "gt")
+keymap.set("n", "<leader><S-Tab>", "gT")
+keymap.set("n", "<leader>t", "<cmd>tabnew<CR>")
+keymap.set("n", "<leader>1", "1gt")
+keymap.set("n", "<leader>2", "2gt")
+keymap.set("n", "<leader>3", "3gt")
+keymap.set("n", "<leader>4", "4gt")
+keymap.set("n", "<leader>5", "5gt")
+keymap.set("n", "<leader>6", "6gt")
+keymap.set("n", "<leader>7", "7gt")
+keymap.set("n", "<leader>8", "8gt")
+keymap.set("n", "<leader>9", "9gt")
+keymap.set("n", "<leader>0", "<cmd>tablast<CR>.")
+
+-- Buffer nav
+keymap.set("n", "<leader>p", "<cmd>bp<CR>")
+keymap.set("n", "<leader>n", "<cmd>bn<CR>")
+
+-- Close buffer
+keymap.set("n", "<leader>c", "<cmd>bd<CR>")
+
+-- Switching windows
+keymap.set("n", "<Tab>", "<C-w><C-w>")
+-- keymap.set("n", "<C-j>", "<C-w>j")
+-- keymap.set("n", "<C-k>", "<C-w>k")
+-- keymap.set("n", "<C-l>", "<C-w>l")
+-- keymap.set("n", "<C-h>", "<C-w>h")
+
+-- vim.api.nvim_create_user_command('Silent', function()
+-- 	execute 'silent !' . <q-args> | execute 'redraw!'
+-- end, {})
+
+-- command! Get :Silent ~/work/p/scripts/rs -g valentins@buildHostBSD-amd64.labo.int -k /home/valentins/work/p/ssh_key/K150 -d firm -n firmware
+
+keymap.set("n", "<F8>", "<cmd>call jobstart('~/work/p/scripts/rs -a valentins@buildHostBSD-amd64.labo.int -k /home/valentins/work/p/ssh_key/K150 -d firm -n firmware')<CR>", { desc = "Copy files to build machine" })

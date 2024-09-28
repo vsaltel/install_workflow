@@ -49,6 +49,9 @@ return {
  			vim.keymap.set('n', 't', api.node.open.tab, opts('Open: New Tab'))
 			vim.keymap.del('n', 's', { buffer = bufnr })
  			vim.keymap.set('n', 's',  api.node.open.vertical, opts('Open: Vertical Split'))
+  			vim.keymap.del('n', '<C-]>', { buffer = bufnr })
+ 			vim.keymap.set('n', '-',  api.tree.change_root_to_node, opts('CD'))
+  			vim.keymap.set('n', '_',  api.tree.change_root_to_parent, opts('Up'))
 
 		end
 

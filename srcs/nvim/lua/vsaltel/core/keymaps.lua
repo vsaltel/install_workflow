@@ -42,6 +42,9 @@ keymap.set("n", "<leader>n", "<cmd>bn<CR>")
 -- Close buffer
 keymap.set("n", "<leader>c", "<cmd>bd<CR>")
 
+-- Join lines
+keymap.set("n", "<C-n>", "J")
+
 -- Switching windows
 keymap.set("n", "<Tab>", "<C-w><C-w>")
 -- keymap.set("n", "<C-j>", "<C-w>j")

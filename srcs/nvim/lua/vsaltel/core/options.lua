@@ -1,7 +1,11 @@
 vim.cmd("let g:netrw_liststyle = 3")
 
+-- prevent vertical split from being resized
+vim.cmd("vertical resize nomodify")
+
 local opt = vim.opt
 
+-- line number
 opt.relativenumber = true
 opt.number = true
 opt.ruler = true
@@ -15,6 +19,10 @@ opt.expandtab = false -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
 
 opt.wrap = false
+
+-- timeout for escape key (10 ms)
+opt.timeoutlen=1000
+opt.ttimeoutlen=0
 
 -- search settings
 opt.ignorecase = true -- ignore case when searching
@@ -31,7 +39,7 @@ opt.signcolumn = "yes" -- show sign column so that text doesn't shift
 opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
 
 -- clipboard
-opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+-- opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 
 -- split windows
 opt.splitright = true -- split vertical window to the right
@@ -53,7 +61,7 @@ opt.smartcase = true
 vim.api.nvim_set_hl(0, 'Comment', { italic=true })
 
 -- mouse settings
-opt.mouse = ""
+opt.mouse = "a"
 opt.mousemodel = popup
 
 -- scroll limiter

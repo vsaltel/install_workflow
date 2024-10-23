@@ -2,18 +2,25 @@ return {
 	"nvim-telescope/telescope.nvim",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
+		"sharkdp/fd",
+		-- "nvim-treesitter/nvim-treesitter",
 		{ "nvim-telescope/telescope-fzf-native.nvim",  build = "make" },
 		"nvim-tree/nvim-web-devicons",
 	},
 	config = function()
+
 		local telescope = require("telescope")
 		local actions = require("telescope.actions")
 
 		telescope.setup({
 				defaults = {
+					preview = {
+						treesitter = false
+					},
 					mappings = {
 						i = {
 							["<C-k>"] = actions.move_selection_previous,
+							["<C-j>"] = actions.move_selection_next,
 						}
 					}
 				}
@@ -21,6 +28,13 @@ return {
 
 		telescope.load_extension("fzf");
 
+		vim.api.nvim_create_user_command(
+			'Config',
+			function ()
+				require('telescope.builtin').find_files({cwd="~/.config/nvim"})
+			end,
+			{}
+		)
 		-- set keymaps
 		local keymap = vim.keymap
 

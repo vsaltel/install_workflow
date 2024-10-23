@@ -6,12 +6,12 @@ return {
 			blacklist = {
 				function(diagnostic)
 					blacklst = {
-						"Included header",
-						"Unknown type name",
-						"declared as a function",
-						"Call to undeclared function",
+						-- "Included header",
+						-- "Unknown type name",
+						-- "declared as a function",
+						-- "Call to undeclared function",
 						"Too many errors",
-						"In included file"
+						-- "In included file"
 					}
 					for i in ipairs(blacklst) do
 						ret = string.find(diagnostic.message, blacklst[i])

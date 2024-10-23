@@ -55,7 +55,3 @@ keymap.set("n", "<Tab>", "<C-w><C-w>")
 -- vim.api.nvim_create_user_command('Silent', function()
 -- 	execute 'silent !' . <q-args> | execute 'redraw!'
 -- end, {})
-
--- command! Get :Silent ~/work/p/scripts/rs -g valentins@buildHostBSD-amd64.labo.int -k /home/valentins/work/p/ssh_key/K150 -d firm -n firmware
-
-keymap.set("n", "<F8>", "<cmd>call jobstart('~/work/p/scripts/rs -a valentins@buildHostBSD-amd64.labo.int -k /home/valentins/work/p/ssh_key/K150 -d firm -n firmware')<CR>", { desc = "Copy files to build machine" })

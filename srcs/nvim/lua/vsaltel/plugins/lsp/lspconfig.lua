@@ -112,6 +112,24 @@ return {
 				-- configure clangd language server
 				lspconfig["clangd"].setup({
 					capabilities = capabilities,
+					cmd = { "clangd" },
+					filetypes = { "c", "cpp", "objc", "objcpp" },
+					root_pattern = {
+						'.clangd',
+						'.clang-tidy',
+						'.clang-format',
+						'compile_commands.json',
+						'compile_flags.txt',
+						'configure.ac',
+						'.git'
+					},
+					single_file_support = true,
+				})
+			end,
+			["perlnavigator"] = function()
+				-- configure perlnavigator language server
+				lspconfig["perlnavigator"].setup({
+					capabilities = capabilities,
 				})
 			end,
 		})

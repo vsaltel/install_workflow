@@ -28,6 +28,7 @@ return {
 				-- list of servers for mason to install
 				ensure_installed = {
 					"clangd",
+					"perlnavigator",
 					-- "ast-grep",
 					-- "python-lsp-server",
 					-- "json-lsp",

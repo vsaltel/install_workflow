@@ -26,7 +26,6 @@ bred="%K{9}"
 bgreen="%K{76}"
 borange="%K{214}"
 bgrey="%K{237}"
-left='%m | %~'
 
 # Enabling and setting git info var to be used in prompt config.
 autoload -Uz vcs_info
@@ -46,43 +45,56 @@ ret_value () {
 
 # Set prompt
 prompt () {
-    PS1=""
+    PROMPT=""
     #Ret value
     if [ "${RET_VALUE}" -eq 0 ];then
-        PS1+="${bgreen}${fblack}${sbold}0${rbold} ${rsa}${borange}${fgreen}${rsa}"
+        PROMPT+="${bgreen}${fblack}${sbold}0${rbold} ${rsa}${borange}${fgreen}${rsa}"
     else
-        PS1+="${bred}${fblack}${sbold}${RET_VALUE}${rbold} ${rsa}${borange}${fred}${rsa}"
+        PROMPT+="${bred}${fblack}${sbold}${RET_VALUE}${rbold} ${rsa}${borange}${fred}${rsa}"
     fi
     #Directory
-    PS1+="${borange}${fblack} ${sbold}%~${rbold} ${rsa}"
+    PROMPT+="${borange}${fblack} ${sbold}%~${rbold} ${rsa}"
+	PROMPT+="${forange}${rsf} "
+
+	# Right Prompt
+	RPROMPT=""
     #Git branch
     setopt PROMPT_SUBST
     if [ "${vcs_info_msg_0_}" ]; then
-        PS1+="${bgrey}${forange}${rsa}${bgrey}${forange} ${sbold}${vcs_info_msg_0_}${rbold} ${rsa}${fgrey}${rsf} "
+		RPROMPT+="${fgrey}${rsf}${bgrey}${forange}${sbold} ${vcs_info_msg_0_} ${rbold}${rsa}"
+		RPROMPT+="${bgrey}${forange}${rsa}"
     else
-        PS1+="${forange}${rsf} "
+		RPROMPT+="${forange}${rsf}"
     fi
+	RPROMPT+="${borange}${fblack}${sbold} %* ${rbold}${rsa}"
 }
 
 # Init prompt
 precmd_functions+=(ret_value)
 precmd_functions+=(prompt)
 
+# Remove right useless space
+ZLE_RPROMPT_INDENT=0
+
 # History parameters:
 HISTSIZE=10000
 SAVEHIST=10000
 HISTFILE=${HOME}/.zsh_history
 setopt inc_append_history_time
+setopt HIST_IGNORE_SPACE
 
 # Basic auto/tab complete:
 autoload -U compinit
 zstyle ':completion:*' menu select
+zstyle ':completion:*' completer _expand_alias _complete _ignored
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots)
 
 # vi mode
-bindkey -v
+# bindkey -v
+
+# Set key delay to 10ms
 export KEYTIMEOUT=1
 
 # Enable reverse search
@@ -93,7 +105,10 @@ bindkey -M menuselect 'h' vi-backward-char
 bindkey -M menuselect 'k' vi-up-line-or-history
 bindkey -M menuselect 'l' vi-forward-char
 bindkey -M menuselect 'j' vi-down-line-or-history
-bindkey -v '^?' backward-delete-char
+
+# Jump next word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
 
 # Use lf to switch directories and bind it to ctrl-o
 lfcd () {
@@ -128,3 +143,4 @@ if [ -f ${HOME}/.zsh_aliases ]; then
 fi
 
 # Plugins
+source /home/valentins/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh

@@ -1,22 +1,12 @@
 ## Aliases      ##
 
-# Vars
-SSHK="/home/valentins/work/ssh_key"
-
-# Hosts
-alias EVA="sshpass -p 'adminadmin' ssh admin@192.168.122.10"
-alias BUILD="sshpass -p 'build' ssh build@192.168.122.11"
+# SSH
+alias ssh="TERM=xterm-256color ssh"
+alias sshpass="TERM=xterm-256color sshpass"
 
 # Color
 alias ls="ls --color=auto"
 alias grep="grep --color"
-
-# Grep
-alias grep='grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
-alias egrep='grep -E --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
-alias fgrep='grep -F --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn,.idea,.tox}'
-alias gr="grep -R"
-alias g="grep"
 
 # Ls
 alias l="ls -lakvNF --group-directories-first -I '..' -I '.'"
@@ -48,6 +38,9 @@ alias syss="systemctl status"
 
 # History
 alias histupd="fc -RI"
+
+# Uncrustify
+alias uncrust='python3 /usr/bin/git-uncrustify'
 
 alias g='git'
 alias ga="git add"
@@ -129,7 +122,8 @@ alias gpsupf='git push --set-upstream origin $(git_current_branch) --force-with-
 alias gpv='git push --verbose'
 # alias gr='git remote'
 alias gra='git remote add'
-alias grb='git rebase'
+alias gr='git rebase'
+alias gri='git rebase -i HEAD~10'
 alias grba='git rebase --abort'
 alias grbc='git rebase --continue'
 alias grbi='git rebase --interactive'

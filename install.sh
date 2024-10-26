@@ -131,8 +131,8 @@ PACKET_MANAGER="apt-get -y"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
 FONT_REQUIRED_PACKAGES="curl unzip"
 TMUX_REQUIRED_PACKAGES="tmux git bash"
-NVIM_REQUIRED_PACKAGES="git build-essential clang make cmake curl git python2-dev \
-	python3 python3-dev ruby-dev python3-pip libperl-dev gettext lazygit npm"
+NVIM_REQUIRED_PACKAGES="git build-essential clang cmake curl git \
+	python3 python3-dev ruby-dev python3-pip libperl-dev gettext npm"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
 FONT_NAME="hack"
@@ -308,15 +308,14 @@ if ask_install "tmux"; then
         ln -s ${SRC_DIR}/tmux.terminfo ${USERHOME}/.tmux/tmux.terminfo
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
 
-        # Install tpm
+        # Install tpm for tmux plugins
         echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-        su ${DESTUSER} -c "git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm" 2>> ${LOGFILE}
+        git clone -q https://github.com/tmux-plugins/tpm ${USERHOME}/.tmux/plugins/tpm 2>> ${LOGFILE}
         if [ -e ${USERHOME}/.tmux/plugins/tpm ]; then
-            # Install tmux plugins
             echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
-            echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
             chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux
             su ${DESTUSER} -c "${USERHOME}/.tmux/plugins/tpm/bin/install_plugins" &>> ${LOGFILE}
+            echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
         fi
     fi
     echo -e "${BOLD}${GREEN}TMUX INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
@@ -326,9 +325,9 @@ fi
 if ask_install "nvim" && ask_overwrite_bin "nvim"; then
     # Uninstall old vim packages
     echo -e "${BOLD}${YELLOW}UNINSTALL NVIM PACKAGES:${NC}" | tee -a ${LOGFILE}
-    VIM_UNINSTALL_PACKAGES="gvim neovim vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
+    NVIM_UNINSTALL_PACKAGES="gvim neovim vim vim-gui-common vim-runtime gvim vim-tiny vim-common \
         vim-gui-common vim-nox"
-    uninstall_packages "${VIM_UNINSTALL_PACKAGES}"
+    uninstall_packages "${NVIM_UNINSTALL_PACKAGES}"
 
     # Install nvim packages
     install_packages "${NVIM_REQUIRED_PACKAGES}"
@@ -358,8 +357,8 @@ if ask_install "nvim" && ask_overwrite_bin "nvim"; then
 fi
 
 ## Nvim config setup
-if command_exists "nvim" && ask_install "nvim config" && ask_overwrite_conf "NVim" "${USERHOME}/.config/nvim"; then
-    if [ ${NVIM_INSTALLED} != "yes" ]; then
+if command_exists "nvim" && ask_install "nvim config" && ask_overwrite_conf "Nvim" "${USERHOME}/.config/nvim"; then
+    if [ ! ${NVIM_INSTALLED} == "yes" ]; then
         # Install nvim packages
         install_packages "${NVIM_REQUIRED_PACKAGES}"
         echo -e "${BOLD}${RED}PROBABLY NEED TO REINSTALL VIM${NC}" | tee -a ${LOGFILE}
@@ -372,6 +371,18 @@ if command_exists "nvim" && ask_install "nvim config" && ask_overwrite_conf "NVi
     echo -e "${BOLD}${YELLOW}CREATE LINK TO CONFIG${NC}" | tee -a ${LOGFILE}
 	ln -s ${SRC_DIR}/nvim ${USERHOME}/.config/nvim
     chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.config/nvim
+
+	# Install Lazygit
+    echo -e "${BOLD}${YELLOW}INSTALL LAZYGIT${NC}" | tee -a ${LOGFILE}
+	LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+	curl -Lo "${DIRPATH}/lazygit.tar.gz" "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" &>> ${LOGFILE}
+    if [ -e "${DIRPATH}/lazygit.tar.gz" ]; then
+		tar xf "${DIRPATH}/lazygit.tar.gz" "lazygit"
+		install "${DIRPATH}/lazygit" "/usr/local/bin"
+		rm "${DIRPATH}/lazygit.tar.gz" "lazygit"
+	else
+		echo -e "${BOLD}${RED}LAZYGIT INSTALL FAILED${NC}" | tee -a ${LOGFILE}
+	fi
 
     echo -e "${BOLD}${GREEN}NVIM CONFIG INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
 fi

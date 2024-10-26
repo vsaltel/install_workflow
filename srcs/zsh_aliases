@@ -12,10 +12,9 @@ alias grep="grep --color"
 alias l="ls -lakvNF --group-directories-first -I '..' -I '.'"
 
 # Find
-alias f="find -name"
+alias agg="ag -g"
 alias fn="find -type f -name"
 alias fd="find -type d -name"
-alias fi="find -iname"
 alias fni="find -type f -iname"
 alias fdi="find -type d -iname"
 alias fp="find -path"

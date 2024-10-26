@@ -131,12 +131,8 @@ PACKET_MANAGER="apt-get -y"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
 FONT_REQUIRED_PACKAGES="curl unzip"
 TMUX_REQUIRED_PACKAGES="tmux git bash"
-VIM_REQUIRED_PACKAGES="libclang-3.9-dev zlib1g-dev libncurses5-dev     \
-    libgtk2.0-dev libatk1.0-dev libcairo2-dev libx11-dev libxpm-dev         \
-    libxt-dev python2-dev python3-dev ruby-dev libncurses-dev liblua5.2-dev \
-    libperl-dev xz-utils build-essential lua5.2 clang cmake curl python3    \
-    python3-pip exuberant-ctags git"
-NVIM_REQUIRED_PACKAGES=""
+NVIM_REQUIRED_PACKAGES="git build-essential clang make cmake curl git python2-dev \
+	python3 python3-dev ruby-dev python3-pip libperl-dev gettext lazygit npm"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
 FONT_NAME="hack"
@@ -234,9 +230,9 @@ if ask_install "zsh" ; then
 
         # Copy new zsh conf
         echo -e "${BOLD}${YELLOW}COPY ZSH CONF${NC}" | tee -a ${LOGFILE}
-        cp ${SRC_DIR}/zshrc ${USERHOME}/.zshrc
+        ln -s ${SRC_DIR}/zshrc ${USERHOME}/.zshrc
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zshrc
-        cp ${SRC_DIR}/zsh_aliases ${USERHOME}/.zsh_aliases
+        ln -s ${SRC_DIR}/zsh_aliases ${USERHOME}/.zsh_aliases
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh_aliases
 
         # Zsh Plugin
@@ -308,8 +304,8 @@ if ask_install "tmux"; then
         # Copy new tmux conf
         echo -e "${BOLD}${YELLOW}COPY TMUX CONF${NC}" | tee -a ${LOGFILE}
 		mkdir -p ${USERHOME}/.tmux
-        cp ${SRC_DIR}/tmux.conf ${USERHOME}/.tmux.conf
-        cp ${SRC_DIR}/tmux.terminfo ${USERHOME}/.tmux/tmux.terminfo
+        ln -s ${SRC_DIR}/tmux.conf ${USERHOME}/.tmux.conf
+        ln -s ${SRC_DIR}/tmux.terminfo ${USERHOME}/.tmux/tmux.terminfo
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
 
         # Install tpm
@@ -326,99 +322,6 @@ if ask_install "tmux"; then
     echo -e "${BOLD}${GREEN}TMUX INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
 fi
 
-## Vim binary setup
-if ask_install "vim" && ask_overwrite_bin "vim"; then
-    # Uninstall old vim packages
-    echo -e "${BOLD}${YELLOW}UNINSTALL VIM PACKAGES:${NC}" | tee -a ${LOGFILE}
-    VIM_UNINSTALL_PACKAGES="gvim neovim vim vim-gui-common vim-runtime gvim vim-tiny vim-common    \
-        vim-gui-common vim-nox"
-    uninstall_packages "${VIM_UNINSTALL_PACKAGES}"
-
-    # Install vim packages
-    install_packages "${VIM_REQUIRED_PACKAGES}"
-
-    # Install vim
-    echo -e "${BOLD}${YELLOW}INSTALL VIM${NC}" | tee -a ${LOGFILE}
-    git clone -q https://github.com/vim/vim.git ${DIRPATH}/vim 2>> ${LOGFILE}
-    if [ -e ${DIRPATH}/vim ]; then
-        cd ${DIRPATH}/vim
-        ./configure --with-features=huge --enable-multibyte --enable-rubyinterp=yes \
-            --enable-python3interp=yes --with-python3-config-dir=$(python3-config --configdir) \
-            --enable-perlinterp=yes --enable-luainterp=yes --enable-gui=gtk2 --enable-cscope \
-            --prefix=/usr/local &>> ${LOGFILE} make VIMRUNTIMEDIR=/usr/local/share/vim/vim90 &>> ${LOGFILE}
-        make install &>> ${LOGFILE}
-        if [ ! -e /usr/local/bin/vim ]; then
-            echo -e "${BOLD}${RED}${PACK} VIM INSTALL FAILED${NC}" | tee -a ${LOGFILE}
-            exit 6
-        fi
-        if command_exists update-alternatives; then
-            update-alternatives --install /usr/bin/editor editor /usr/local/bin/vim 1 &>> ${LOGFILE}
-            update-alternatives --set editor /usr/local/bin/vim &>> ${LOGFILE}
-            update-alternatives --install /usr/bin/vi vi /usr/local/bin/vim 1 &>> ${LOGFILE}
-            update-alternatives --set vi /usr/local/bin/vim &>> ${LOGFILE}
-        fi
-        cd - >> ${LOGFILE}
-        rm -Rf ${DIRPATH}/vim
-    fi
-    VIM_INSTALLED="yes"
-    echo -e "${BOLD}${GREEN}VIM INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
-fi
-
-## Vim config setup
-if command_exists "vim" && ask_install "vim config" && ask_overwrite_conf "Vim" "${USERHOME}/.vim" "${USERHOME}/.vimrc"; then
-    if [ ${VIM_INSTALLED} != "yes" ]; then
-        # Install vim packages
-        install_packages "${VIM_REQUIRED_PACKAGES}"
-        echo -e "${BOLD}${RED}PROBABLY NEED TO RECOMPILE VIM${NC}" | tee -a ${LOGFILE}
-    fi
-    # Remove old vim conf
-    echo -e "${BOLD}${YELLOW}REMOVE OLD VIM CONF${NC}" | tee -a ${LOGFILE}
-    if [ -e ${USERHOME}/.vimrc ]; then rm ${USERHOME}/.vimrc &>> ${LOGFILE}; fi
-    if [ -e ${USERHOME}/.vim ]; then rm -Rf ${USERHOME}/.vim &>> ${LOGFILE}; fi
-
-    # Copy new vim conf
-    echo -e "${BOLD}${YELLOW}COPY VIM CONF${NC}" | tee -a ${LOGFILE}
-    cp ${SRC_DIR}/vimrc ${USERHOME}/.vimrc
-    chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.vimrc
-
-    # Copy vim plugin manager
-    echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}
-    su ${DESTUSER} -c "curl -fLo ${USERHOME}/.vim/autoload/plug.vim --create-dirs \
-        https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" &>> ${LOGFILE}
-
-    # Install vim plugins
-    if [ ${?} -eq 0 ]; then
-        echo -e "${BOLD}${YELLOW}INSTALL VIM PLUGINS${NC}" | tee -a ${LOGFILE}
-        VIM_PLUGIN_DIR="${USERHOME}/.vim/plugged"
-        su ${DESTUSER} -c "vim +'PlugInstall --sync' +quitall" &>> ${LOGFILE}
-        if [ ${?} -eq 0 ]; then
-            # Install youcompleteme vim plugin
-            if [ -e ${VIM_PLUGIN_DIR}/YouCompleteMe ]; then
-                su ${DESTUSER} -c "python3 ${VIM_PLUGIN_DIR}/YouCompleteMe/install.py --clangd-completer" >> ${LOGFILE}
-            fi
-            # Install color_coded
-            if [ -e ${VIM_PLUGIN_DIR}/color_coded ]; then
-                rm -f ${VIM_PLUGIN_DIR}/color_coded/CMakeCache.txt
-                mkdir ${VIM_PLUGIN_DIR}/color_coded/build
-                chown -R ${DESTUSER}:${DESTUSER} ${VIM_PLUGIN_DIR}/color_coded
-                cd ${VIM_PLUGIN_DIR}/color_coded/build
-                su ${DESTUSER} -c "cmake .. -DDOWNLOAD_CLANG=0" &>> ${LOGFILE}
-                su ${DESTUSER} -c "make && make install" &>> ${LOGFILE}
-                su ${DESTUSER} -c "make clean && make clean_clang" &>> ${LOGFILE}
-                cd - >> ${LOGFILE}
-            fi
-        fi
-        # Copy vim plugins config
-        echo -e "${BOLD}${YELLOW}COPY VIM PLUGINS CONFIG${NC}" | tee -a ${LOGFILE}
-        if [ -e ${SRC_DIR}/c.snippets ]; then
-            mkdir -p ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips
-            cp ${SRC_DIR}/c.snippets ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips/c.snippets
-            chown -R ${DESTUSER}:${DESTUSER} ${VIM_PLUGIN_DIR}/ultisnips/UltiSnips
-        fi
-    fi
-    echo -e "${BOLD}${GREEN}VIM CONFIG INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}
-fi
-
 ## Nvim binary setup
 if ask_install "nvim" && ask_overwrite_bin "nvim"; then
     # Uninstall old vim packages
@@ -431,11 +334,11 @@ if ask_install "nvim" && ask_overwrite_bin "nvim"; then
     install_packages "${NVIM_REQUIRED_PACKAGES}"
 
     # Install nvim
-    echo -e "${BOLD}${YELLOW}INSTALL VIM${NC}" | tee -a ${LOGFILE}
+    echo -e "${BOLD}${YELLOW}INSTALL NVIM${NC}" | tee -a ${LOGFILE}
     git clone -q https://github.com/neovim/neovim ${DIRPATH}/nvim 2>> ${LOGFILE}
     if [ -e ${DIRPATH}/nvim ]; then
         cd ${DIRPATH}/nvim
-		make CMAKE_BUILD_TYPE=RelWithDebInfo
+		make CMAKE_BUILD_TYPE=RelWithDebInfo &>> ${LOGFILE}
         make install &>> ${LOGFILE}
         if [ ! -e /usr/local/bin/nvim ]; then
             echo -e "${BOLD}${RED}${PACK} NVIM INSTALL FAILED${NC}" | tee -a ${LOGFILE}

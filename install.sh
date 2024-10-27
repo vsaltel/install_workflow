@@ -131,7 +131,7 @@ PACKET_MANAGER="apt-get -y"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
 FONT_REQUIRED_PACKAGES="curl unzip"
 TMUX_REQUIRED_PACKAGES="tmux git bash"
-NVIM_REQUIRED_PACKAGES="git build-essential clang cmake curl git \
+NVIM_REQUIRED_PACKAGES="git build-essential clang cmake curl git ripgrep \
 	python3 python3-dev ruby-dev python3-pip libperl-dev gettext npm"
 COPY_MODE=0
 COPY_DIR="${DIRPATH}/workflow_copy"
@@ -239,13 +239,7 @@ if ask_install "zsh" ; then
         echo -e "${BOLD}${YELLOW}INSTALL ZSH PLUGINS${NC}" | tee -a ${LOGFILE}
         mkdir -p ${USERHOME}/.zsh/plugins
         git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting 2>> ${LOGFILE}
-        if [ -e ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting ]; then
-            echo "source ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" >> ${USERHOME}/.zshrc
-        fi
         git clone -q https://github.com/zsh-users/zsh-autosuggestions ${USERHOME}/.zsh/plugins/zsh-autosuggestions 2>> ${LOGFILE}
-        if [ -e ${USERHOME}/.zsh/plugins/zsh-autosuggestions ]; then
-            echo "source ${USERHOME}/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh" >> ${USERHOME}/.zshrc
-        fi
         chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh
 
         # Lf install
@@ -315,7 +309,6 @@ if ask_install "tmux"; then
             echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGINS${NC}" | tee -a ${LOGFILE}
             chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux
             su ${DESTUSER} -c "${USERHOME}/.tmux/plugins/tpm/bin/install_plugins" &>> ${LOGFILE}
-            echo "run '${USERHOME}/.tmux/plugins/tpm/tpm'" >> ${USERHOME}/.tmux.conf
         fi
     fi
     echo -e "${BOLD}${GREEN}TMUX INSTALLATION SUCCESSFULL !${NC}" | tee -a ${LOGFILE}

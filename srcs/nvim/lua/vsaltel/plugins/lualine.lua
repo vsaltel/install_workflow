@@ -2,6 +2,10 @@ return {
 	"nvim-lualine/lualine.nvim",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	config = function()
+		-- fix behaviour github.com/nvim-lualine/lualine.nvim/issues/1312
+		vim.api.nvim_set_hl(0, "Statusline", {reverse = false})
+		vim.api.nvim_set_hl(0, "StatuslineNC", {reverse = false})
+
 		local custom_gruvbox = require('lualine.themes.gruvbox')
 
 		custom_gruvbox.normal.a.bg = '#feaf01'

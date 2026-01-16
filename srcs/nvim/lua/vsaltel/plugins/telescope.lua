@@ -6,6 +6,7 @@ return {
 		-- "nvim-treesitter/nvim-treesitter",
 		{ "nvim-telescope/telescope-fzf-native.nvim",  build = "make" },
 		"nvim-tree/nvim-web-devicons",
+		"nvim-telescope/telescope-live-grep-args.nvim",
 	},
 	config = function()
 
@@ -26,6 +27,7 @@ return {
 				}
 			})
 
+		telescope.load_extension("live_grep_args")
 		telescope.load_extension("fzf");
 
 		vim.api.nvim_create_user_command(
@@ -40,7 +42,7 @@ return {
 
 		keymap.set("n", "<leader>f", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
 		keymap.set("n", "<leader>r", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-		keymap.set("n", "<leader>s", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
+		keymap.set("n", "<leader>s", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 		keymap.set("n", "<leader>w", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
 	end
 }

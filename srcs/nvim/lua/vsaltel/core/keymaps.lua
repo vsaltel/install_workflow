@@ -24,6 +24,7 @@ keymap.set("n", "<leader>v", "<cmd>vsplit<CR>")
 keymap.set("n", "<leader><Tab>", "gt")
 keymap.set("n", "<leader><S-Tab>", "gT")
 keymap.set("n", "<leader>t", "<cmd>tabnew<CR>")
+keymap.set("n", "<leader>T", "<cmd>tab split<CR>")
 keymap.set("n", "<leader>1", "1gt")
 keymap.set("n", "<leader>2", "2gt")
 keymap.set("n", "<leader>3", "3gt")
@@ -47,11 +48,3 @@ keymap.set("n", "<C-n>", "J")
 
 -- Switching windows
 keymap.set("n", "<Tab>", "<C-w><C-w>")
--- keymap.set("n", "<C-j>", "<C-w>j")
--- keymap.set("n", "<C-k>", "<C-w>k")
--- keymap.set("n", "<C-l>", "<C-w>l")
--- keymap.set("n", "<C-h>", "<C-w>h")
-
--- vim.api.nvim_create_user_command('Silent', function()
--- 	execute 'silent !' . <q-args> | execute 'redraw!'
--- end, {})

@@ -3,6 +3,9 @@ vim.cmd("let g:netrw_liststyle = 3")
 -- prevent vertical split from being resized
 vim.cmd("vertical resize nomodify")
 
+-- prevent adding a newline at the end of a file
+vim.cmd("set nofixeol")
+
 local opt = vim.opt
 
 -- line number
@@ -39,7 +42,7 @@ opt.signcolumn = "yes" -- show sign column so that text doesn't shift
 opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
 
 -- clipboard
--- opt.clipboard:append("unnamedplus") -- use system clipboard as default register
+opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 
 -- split windows
 opt.splitright = true -- split vertical window to the right
@@ -57,8 +60,33 @@ opt.incsearch = true
 opt.ignorecase = true
 opt.smartcase = true
 
+-- highlight special chars
+opt.list = true
+opt.listchars = {
+  tab = "--⮞",
+  -- space = "·",
+  -- trail = "·",
+  -- extends = "»",
+  -- precedes = "«",
+}
+
 -- comment italic
 vim.api.nvim_set_hl(0, 'Comment', { italic=true })
+
+-- Set TrailingWhitespace in red
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    vim.api.nvim_set_hl(0, "TrailingWhitespace", {
+      bg = "LightRed",
+    })
+  end,
+})
+vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "InsertLeave" }, {
+  callback = function()
+    vim.fn.clearmatches()
+    vim.fn.matchadd("TrailingWhitespace", "\\s\\+$")
+  end,
+})
 
 -- mouse settings
 opt.mouse = "a"

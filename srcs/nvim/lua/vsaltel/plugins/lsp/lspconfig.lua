@@ -59,7 +59,7 @@ return {
 				keymap.set("n", "gd", "<cmd>Telescope lsp_definitions<CR>", opts) -- show lsp definitions
 
 				opts.desc = "Show LSP implementations"
-				keymap.set("n", "\"", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
+				keymap.set("n", "gi", "<cmd>Telescope lsp_implementations<CR>", opts) -- show lsp implementations
 
 				opts.desc = "Show LSP type definitions"
 				keymap.set("n", "gt", "<cmd>Telescope lsp_type_definitions<CR>", opts) -- show lsp type definitions
@@ -82,8 +82,8 @@ return {
 				opts.desc = "Go to next diagnostic"
 				keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- jump to next diagnostic in buffer
 
-				-- opts.desc = "Show documentation for what is under cursor"
-				-- keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
+				opts.desc = "Show documentation for what is under cursor"
+				keymap.set("n", "gK", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
 				opts.desc = "Restart LSP"
 				keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary

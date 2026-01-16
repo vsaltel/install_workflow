@@ -11,6 +11,7 @@ local opt = vim.opt
 -- refresh time
 opt.lazyredraw = true
 opt.updatetime = 250
+opt.ttyfast = true
 
 -- line number
 opt.relativenumber = true
@@ -40,7 +41,7 @@ opt.gdefault = true   -- :subtitute is global
 -- turn on termguicolors for tokyonight colorscheme to work
 opt.termguicolors = true
 opt.background = "dark" -- colorschemes that can be light or dark will be made dark
-opt.signcolumn = "yes" -- show sign column so that text doesn't shift
+opt.signcolumn = "auto:1" -- dont show sign column if sign list is empty
 
 -- backspace
 opt.backspace = "indent,eol,start" -- allow backspace on indent, end of line or insert mode start position
@@ -80,6 +81,9 @@ opt.showcmd = false
 opt.cmdheight = 1
 opt.laststatus = 2
 
+-- cmd bar
+opt.cmdheight = 0
+
 -- autoread when files get update
 opt.autoread = true
 
@@ -87,43 +91,13 @@ opt.autoread = true
 opt.smartindent = true
 opt.shiftround = true
 
-opt.colorcolumn = "90"
-
 -- highlight current line on the cursor
 opt.cursorline = true
 
 -- highlight special chars
 opt.list = true
 opt.listchars = {
-	tab = "--⮞",
+	tab = "→·",
 	extends = "»",
 	precedes = "«",
-	-- space = "·",
-	-- trail = "·",
 }
-
--- Set TrailingWhitespace in red except in insert mode
-vim.api.nvim_create_autocmd("ColorScheme", {
-	callback = function()
-		vim.api.nvim_set_hl(0, "TrailingWhitespace", {
-			bg = "#ff5555"
-		})
-	end,
-})
-
-local function enable_trailing_whitespace()
-	vim.fn.clearmatches()
-	vim.fn.matchadd("TrailingWhitespace", "\\s\\+$")
-end
-
-local function disable_trailing_whitespace()
-	vim.fn.clearmatches()
-end
-
-vim.api.nvim_create_autocmd({ "BufEnter", "BufWinEnter", "InsertLeave" }, {
-	callback = enable_trailing_whitespace,
-})
-
-vim.api.nvim_create_autocmd("InsertEnter", {
-	callback = disable_trailing_whitespace,
-})

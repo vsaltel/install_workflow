@@ -5,40 +5,19 @@ return {
 		"hrsh7th/cmp-nvim-lsp",
 		{ "antosha417/nvim-lsp-file-operations", config = true },
 		{ "folke/neodev.nvim", opts = {} },
+		{ "williamboman/mason.nvim" },
+		{ "williamboman/mason-lspconfig.nvim" },
 	},
 	config = function()
-		-- import lspconfig plugin
 		local lspconfig = require("lspconfig")
-
-		-- import mason_lspconfig plugin
+		local mason = require("mason")
 		local mason_lspconfig = require("mason-lspconfig")
-
-		-- import cmp-nvim-lsp plugin
 		local cmp_nvim_lsp = require("cmp_nvim_lsp")
+		local keymap = vim.keymap
 
-		local keymap = vim.keymap -- for conciseness
-
-		-- Stop diagnostics message
-		-- vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
-		-- 	vim.lsp.diagnostic.on_publish_diagnostics, {
-				-- virtual_text = false,
-				-- virtual_lines = false,
-				-- underline = false,
-				-- signs = false,
-		-- })
-
-		-- toggle diagnostic
-		vim.g["diagnostics_active"] = true
-		function Toggle_diagnostics()
-			if vim.g.diagnostics_active then
-				vim.g.diagnostics_active = false
-				vim.diagnostic.disable()
-			else
-				vim.g.diagnostics_active = true
-				vim.diagnostic.enable()
-			end
-		end
-		vim.keymap.set('n', '<F5>', Toggle_diagnostics, { noremap = true, silent = true, desc = "Toggle vim diagnostics" })
+		-- Setup mason
+		mason.setup()
+		mason_lspconfig.setup()
 
 		-- mapping
 		vim.api.nvim_create_autocmd("LspAttach", {
@@ -92,46 +71,70 @@ return {
 
 		-- used to enable autocompletion (assign to every lsp server config)
 		local capabilities = cmp_nvim_lsp.default_capabilities()
+		capabilities.offsetEncoding = { "utf-16" }
 
-		-- Change the Diagnostic symbols in the sign column (gutter)
-		-- (not in youtube nvim video)
+		local servers = { "clangd" }
+
+		-- Default conf for servers
+		for _, lsp in ipairs(servers) do
+			lspconfig[lsp].setup({
+				capabilities = capabilities,
+			})
+		end
+
+		-- Clangd conf
+		lspconfig.clangd.setup({
+			on_attach = on_attach,
+			capabilities = capabilities,
+			cmd = {
+				"clangd",
+				"--background-index",       -- indexation en arrière-plan pour diagnostics rapides
+				"--clang-tidy",             -- active clang-tidy pour les diagnostics avancés
+				"--completion-style=detailed", -- plus d'infos dans l'autocompletion
+				"--header-insertion=never", -- empêche l’insertion automatique de #include
+				"--cross-file-rename",      -- supporte les renommages cross-file
+			},
+			filetypes = { "c", "cpp", "objc", "objcpp" },
+			root_dir = lspconfig.util.root_pattern(
+				'.clangd',
+				'.clang-tidy',
+				'.clang-format',
+				'compile_commands.json',
+				'compile_flags.txt',
+				'configure.ac',
+				'.git'
+			),
+			single_file_support = true,
+		})
+
+		-- Diagnostic
+		vim.diagnostic.config({
+			virtual_text = false,
+			signs = true,
+			underline = true,
+			update_in_insert = false,
+			severity_sort = true,
+			severity = { min = vim.diagnostic.severity.WARN }, -- ignore les INFO et HINT
+		})
+
+		-- toggle diagnostic
+		vim.g.diagnostics_active = false
+		function Toggle_diagnostics()
+			if vim.g.diagnostics_active then
+				vim.g.diagnostics_active = false
+				vim.diagnostic.disable()   -- global
+			else
+				vim.g.diagnostics_active = true
+				vim.diagnostic.enable()    -- global
+			end
+		end
+		vim.keymap.set("n", "<F5>", Toggle_diagnostics, { noremap = true, silent = true })
+
 		local signs = { Error = " ", Warn = " ", Hint = "󰠠 ", Info = " " }
 		for type, icon in pairs(signs) do
 			local hl = "DiagnosticSign" .. type
 			vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
 		end
 
-		mason_lspconfig.setup_handlers({
-			-- default handler for installed servers
-			function(server_name)
-				lspconfig[server_name].setup({
-					capabilities = capabilities,
-				})
-			end,
-			["clangd"] = function()
-				-- configure clangd language server
-				lspconfig["clangd"].setup({
-					capabilities = capabilities,
-					cmd = { "clangd" },
-					filetypes = { "c", "cpp", "objc", "objcpp" },
-					root_pattern = {
-						'.clangd',
-						'.clang-tidy',
-						'.clang-format',
-						'compile_commands.json',
-						'compile_flags.txt',
-						'configure.ac',
-						'.git'
-					},
-					single_file_support = true,
-				})
-			end,
-			["perlnavigator"] = function()
-				-- configure perlnavigator language server
-				lspconfig["perlnavigator"].setup({
-					capabilities = capabilities,
-				})
-			end,
-		})
 	end,
 }

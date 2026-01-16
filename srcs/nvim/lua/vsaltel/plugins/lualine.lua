@@ -8,9 +8,11 @@ return {
 
 		local custom_gruvbox = require('lualine.themes.gruvbox')
 
-		custom_gruvbox.normal.a.bg = '#feaf01'
-		custom_gruvbox.normal.c.fg = '#feaf01'
+		custom_gruvbox.normal.a.bg = '#feaf01'   -- orange vif
+		custom_gruvbox.normal.a.fg = '#282828'   -- contraste
+		custom_gruvbox.normal.c.fg = '#ebdbb2'   -- gris clair
 		custom_gruvbox.normal.c.gui = 'bold'
+
 		custom_gruvbox.inactive.c.fg = '#aaaaa9'
 		custom_gruvbox.inactive.a.fg = '#aaaaa9'
 
@@ -40,7 +42,8 @@ return {
 					{
 						'filename',
 						file_status = true,
-						path = 0,
+						path = 3,
+						shorting_target = 40,
 						symbols = {
 							modified = ' ●',       -- Text to show when the buffer is modified
 							readonly = '[-]',      -- Text to show when the file is non-modifiable or readonly.
@@ -60,7 +63,8 @@ return {
 					{
 						'filename',
 						file_status = true,
-						path = 3,
+						path = 0,
+						shorting_target = 40,
 						symbols = {
 							modified = ' ●',       -- Text to show when the buffer is modified
 							readonly = '[-]',      -- Text to show when the file is non-modifiable or readonly.
@@ -76,7 +80,7 @@ return {
 			tabline = {},
 			winbar = {},
 			inactive_winbar = {},
-			extensions = {'nvim-tree', 'mason', 'lazy'}
+			extensions = {'nvim-tree', 'mason', 'lazy', 'toggleterm'}
 		}
 	end
 }

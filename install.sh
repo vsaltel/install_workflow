@@ -128,6 +128,7 @@ SRC_DIR="${DIRPATH}/srcs"
 CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf tmux.terminfo"
 CONFIG_DIRS="zsh vim tmux"
 PACKET_MANAGER="apt-get -y"
+KITTY_REQUIRED_PACKAGES="kitty"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
 FONT_REQUIRED_PACKAGES="curl unzip"
 TMUX_REQUIRED_PACKAGES="tmux git bash"
@@ -215,6 +216,22 @@ echo -e "${BOLD}${GREEN}INSTALLATION START !${NC}" | tee -a ${LOGFILE}
 ## Update packages
 echo -e "${BOLD}${YELLOW}UPDATE PACKAGES${NC}" | tee -a ${LOGFILE}
 update_packages
+
+## Install kitty
+if ask_install "kitty" ; then
+    # Install kitty requiered packages
+    install_packages "${KITTY_REQUIRED_PACKAGES}"
+
+    # Install kitty conf
+    if ask_overwrite_conf "Kitty" "${USERHOME}/.config/kitty" "${USERHOME}/.config/kitty/kitty.conf"; then
+        if [ -e ${USERHOME}/.config/kitty ]; then rm -Rf ${USERHOME}/.config/kitty &>> ${LOGFILE}; fi
+
+        # Copy new kitty conf
+        echo -e "${BOLD}${YELLOW}COPY KITTY CONF${NC}" | tee -a ${LOGFILE}
+        ln -s ${SRC_DIR}/kitty ${USERHOME}/.config/kitty
+        chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.config/kitty
+    fi
+fi
 
 ## Install zsh conf
 if ask_install "zsh" ; then

@@ -41,7 +41,7 @@ return {
 		local keymap = vim.keymap
 
 		keymap.set("n", "<leader>f", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
-		keymap.set("n", "<leader>r", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
+		keymap.set("n", "<leader>o", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
 		keymap.set("n", "<leader>s", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 		keymap.set("n", "<leader>w", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
 	end

@@ -10,7 +10,7 @@ local opt = vim.opt
 
 -- refresh time
 opt.lazyredraw = true
-opt.updatetime = 250
+opt.updatetime = 400
 opt.ttyfast = true
 
 -- line number
@@ -73,7 +73,7 @@ opt.mousehide = true
 
 -- scroll limiter
 opt.sidescrolloff = 8
-opt.scrolloff = 8
+opt.scrolloff = 999 -- previous 8
 
 -- status bar
 opt.showmode = false

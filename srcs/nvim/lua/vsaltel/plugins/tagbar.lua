@@ -1,5 +1,5 @@
 return {
-	"majutsushi/tagbar",
+	"preservim/tagbar",
 	config = function()
 		vim.g.tagbar_autofocus = 1
 

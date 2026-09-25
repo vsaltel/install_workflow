@@ -44,5 +44,6 @@ return {
 		keymap.set("n", "<leader>o", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
 		keymap.set("n", "<leader>s", ":lua require('telescope').extensions.live_grep_args.live_grep_args()<CR>")
 		keymap.set("n", "<leader>w", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+		keymap.set("n", "<leader>g", "<cmd>Telescope git_status<cr>", { desc = "Find modified files from git HEAD" })
 	end
 }

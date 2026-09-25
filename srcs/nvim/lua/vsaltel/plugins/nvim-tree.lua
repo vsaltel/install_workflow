@@ -35,7 +35,6 @@ return {
 			vim.keymap.set('n', '_', api.tree.change_root_to_parent, opts('Up'))
 		end
 
-		-- setup unique (fs_event watcher laissé actif par défaut)
 		nvimtree.setup({
 			sort = {
 				sorter = "case_sensitive",
@@ -48,8 +47,8 @@ return {
 			},
 			filters = {
 				dotfiles = true,
-				-- patterns Lua matchés sur le CHEMIN COMPLET : "/build/" exclut le composant
-				-- "build" sans toucher à un fichier "buildinfo.c" — adapte à tes répertoires
+				-- Lua patterns matched on the FULL PATH: "/build/" excludes the
+				-- "build" component without touching a file like "buildinfo.c"
 				exclude = { "/build/", "/out/", "/obj/", "/.git" },
 			},
 			on_attach = my_on_attach,

@@ -1,4 +1,11 @@
 -- Diagnostic config
+-- on_jump: replaces jump.float (deprecated in 0.13, removed in 0.14)
+local function on_jump(diagnostic, bufnr)
+	if diagnostic then
+		vim.diagnostic.open_float(diagnostic)
+	end
+end
+
 vim.diagnostic.config({
 	float = {
 		source = false,
@@ -24,7 +31,7 @@ vim.diagnostic.config({
 	underline = true,
 	severity_sort = true,
 	jump = {
-		float = true,
+		on_jump = on_jump,
 	},
 	update_in_insert = false,
 })

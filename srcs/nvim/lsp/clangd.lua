@@ -33,9 +33,6 @@ local function get_clangd_executable()
   return 'clangd'
 end
 
-		-- "--background-index",       -- indexation en arrière-plan pour diagnostics rapides
-		-- "--completion-style=detailed", -- plus d'infos dans l'autocompletion
-		-- "--header-insertion=never", -- empêche l’insertion automatique de #include
 return {
 	cmd = {
 		get_clangd_executable(),
@@ -43,6 +40,7 @@ return {
 		'--clang-tidy',
 		'--enable-config',
 		'--pch-storage=memory',
+		'--header-insertion=never',
 		'-j', '4',
 		-- '--log=error',
 	},
@@ -56,4 +54,5 @@ return {
 		'.git'
 	},
 	filetypes = { "c", "cpp", "objc", "objcpp" },
+	enable_snippets = true,
 }

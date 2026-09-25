@@ -13,10 +13,9 @@ return {
 			return
 		end
 
-		local dashboard = require("alpha.themes.dashboard")
-		local if_nil = vim.F.if_nil
+	local dashboard = require("alpha.themes.dashboard")
 
-		local file_icons = {
+	local file_icons = {
 			enabled = true,
 			highlight = true,
 			-- available: devicons, mini, to use nvim-web-devicons or mini.icons
@@ -83,8 +82,8 @@ return {
 		--- @param cwd string? optional
 		--- @param items_number number? optional number of items to generate, default = 10
 		local function mru(start, cwd, items_number, opts)
-			opts = opts or mru_opts
-			items_number = if_nil(items_number, 10)
+		opts = opts or mru_opts
+		items_number = items_number or 10
 
 			local oldfiles = {}
 			for _, v in pairs(vim.v.oldfiles) do

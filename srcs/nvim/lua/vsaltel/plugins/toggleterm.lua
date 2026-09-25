@@ -9,16 +9,13 @@ return {
 			direction = 'float',
 		})
 
-		local Terminal  = require('toggleterm.terminal').Terminal
+		local Terminal = require('toggleterm.terminal').Terminal
 		local lazygit = Terminal:new({ cmd = "lazygit", hidden = true })
 
-		function _lazygit_toggle()
+		vim.keymap.set("n", "<leader>z", function()
 			lazygit:toggle()
-		end
-
-		vim.api.nvim_set_keymap("n", "<leader>z", "<cmd>lua _lazygit_toggle()<CR>", {noremap = true, silent = true})
-		vim.api.nvim_set_keymap("t", "<leader><Esc>", "<c-\\><c-n>", {noremap = true, silent = true})
-
-		vim.api.nvim_set_keymap("n", "<F8>", '<cmd>TermExec cmd="rs B150 -k KB150 -d firm -n firmware; exit"<CR>', {noremap = true, silent = true})
+		end, { desc = "Toggle lazygit" })
+		vim.keymap.set("t", "<leader><Esc>", "<C-\\><C-n>", { desc = "Terminal: escape to normal mode" })
+		vim.keymap.set("n", "<F8>", '<cmd>TermExec cmd="rs B150 -k KB150 -d firm -n firmware; exit"<CR>', { desc = "Build & flash firmware" })
 	end
 }

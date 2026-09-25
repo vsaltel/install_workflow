@@ -8,6 +8,11 @@ return {
 
 		local custom_gruvbox = require('lualine.themes.gruvbox')
 
+	-- the "recording" (q) and "replay" (@) modes are not shown by default
+	local lualine_mode = require('lualine.utils.mode')
+	lualine_mode.map['rec'] = 'RECORDING'
+	lualine_mode.map['r'] = 'REPLAY' -- lualine default: "REPLACE" (incorrect)
+
 		custom_gruvbox.normal.a.bg = '#feaf01'   -- orange vif
 		custom_gruvbox.normal.a.fg = '#282828'   -- contraste
 		custom_gruvbox.normal.c.fg = '#ebdbb2'   -- gris clair
@@ -35,8 +40,24 @@ return {
 					winbar = 1000,
 				}
 			},
-			sections = {
-				lualine_a = {'mode'},
+		sections = {
+			-- single 'mode' component: a hidden second one would drop the section
+			-- separator. mode() never returns 'rec', so we key off reg_recording().
+			lualine_a = {
+				{
+					'mode',
+					fmt = function(m)
+						return vim.fn.reg_recording() ~= '' and 'RECORDING' or m
+					end,
+					-- the color fn's group doesn't inherit the theme 'gui', so bold
+					-- is forced here; bg-only (not fg+bg) keeps the section separator
+					color = function()
+						return vim.fn.reg_recording() ~= ''
+							and { bg = '#cc241d', gui = 'bold' }
+							or { gui = 'bold' }
+					end,
+				},
+			},
 				lualine_b = {'branch', 'diff', 'diagnostics'},
 				lualine_c = {
 					{
@@ -80,7 +101,7 @@ return {
 			tabline = {},
 			winbar = {},
 			inactive_winbar = {},
-			extensions = {'nvim-tree', 'mason', 'lazy', 'toggleterm'}
+			extensions = {'nvim-tree', 'lazy', 'toggleterm'}
 		}
 	end
 }

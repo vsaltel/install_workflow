@@ -45,9 +45,27 @@ keymap.set("n", "<leader>c", "<cmd>bd<CR>", { desc = "Close buffer" })
 
 -- Quickfix
 keymap.set("n", "<leader>q", "<cmd>copen<CR>", { desc = "Open quickfix" })
+keymap.set("n", "<leader>qc", "<cmd>cclose<CR>", { desc = "Close quickfix" })
 
 -- Join lines
 keymap.set("n", "<C-n>", "J", { desc = "Join lines" })
 
 -- Switching windows
 keymap.set("n", "<Tab>", "<C-w><C-w>", { desc = "Cycle windows" })
+
+-- Recording feedback: ModeChanged doesn't fire on record start/stop, so we
+-- poll reg_recording() and refresh lualine on change. (q stops, not Esc.)
+do
+	local last = ""
+	local function check()
+		local now = vim.fn.reg_recording()
+		if now ~= last then
+			last = now
+			pcall(function()
+				require("lualine").refresh()
+			end)
+		end
+		vim.defer_fn(check, 100)
+	end
+	check()
+end

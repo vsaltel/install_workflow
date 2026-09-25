@@ -10,9 +10,9 @@ return {
 		set_trailing_hl()
 		vim.api.nvim_create_autocmd("ColorScheme", { callback = set_trailing_hl })
 
-		-- matchadd est window-local : le match survit au changement de buffer dans
-		-- la même fenêtre, et BufEnter ne PASSE pas quand un terminal remplace le
-		-- buffer (seul TermOpen passe) -> on nettoie explicitement par fenêtre
+		-- matchadd is window-local: the match survives buffer changes in the same
+		-- window, and BufEnter does NOT fire when a terminal replaces the buffer
+		-- (only TermOpen does) -> so we clean up explicitly per window
 		local trail_ids = {}
 
 		local function remove_trail()

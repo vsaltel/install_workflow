@@ -5,9 +5,10 @@ vim.cmd("set nofixeol")
 
 local opt = vim.opt
 
--- prevent splits from being resized (remplace `:vertical resize nomodify`)
-opt.winfixwidth = true
-opt.winfixheight = true
+-- winfixwidth/height=false so `equalalways` can equalize splits
+-- (true gave uneven splits when opening files from nvim-tree).
+opt.winfixwidth = false
+opt.winfixheight = false
 
 -- refresh time
 opt.lazyredraw = true
@@ -29,8 +30,9 @@ opt.autoindent = true -- copy indent from indent line when starting a new line
 
 opt.wrap = false
 
--- délai d'attente des séquences de touches (ex. ,c vs ,ca)
-opt.timeoutlen = 400
+-- timeout for key sequences (e.g. ,c vs ,ca)
+-- 800: value recommended by which-key (stable menu) — single source, which-key no longer overrides it
+opt.timeoutlen = 800
 opt.ttimeoutlen = 0
 
 -- search settings
@@ -53,11 +55,24 @@ opt.clipboard:append("unnamedplus") -- use system clipboard as default register
 -- split windows
 opt.splitright = true -- split vertical window to the right
 opt.splitbelow = true -- split horizontal window to the bottom
-opt.splitkeep = "screen" -- le curseur garde sa position écran lors des split/resize
-opt.pumheight = 10 -- menu de complétion limité à 10 lignes
+opt.splitkeep = "screen" -- the cursor keeps its screen position on split/resize
+opt.pumheight = 10 -- completion menu limited to 10 lines
 
--- aperçu live de :s/// dans une fenêtre avant validation
+-- live preview of :s/// in a window before confirming
 opt.inccommand = "split"
+
+-- native completion (Ctrl-X Ctrl-L): same rules as nvim-cmp
+opt.completeopt = "menu,menuone,noselect"
+
+-- rounded borders for floating windows (0.11+)
+opt.winborder = "rounded"
+
+-- less noise in the command line:
+-- F filename on open, I intro message, C "scanning tags", o "overwriting", t/s search messages, u undo/redo
+opt.shortmess:append("FICotsu")
+
+-- historique de commandes
+opt.history = 1000
 
 -- turn off swapfile
 opt.swapfile = false
@@ -87,9 +102,9 @@ opt.scrolloff = 999 -- previous 8
 
 -- status bar
 opt.showmode = false
-opt.showcmd = false
+opt.showcmd = true
 opt.laststatus = 2
-opt.cmdheight = 0
+opt.cmdheight = 1
 
 -- autoread when files get update
 opt.autoread = true

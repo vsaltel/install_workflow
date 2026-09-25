@@ -40,15 +40,17 @@ return {
 				"cpp",
 				"perl",
 			},
-			-- incremental_selection = {
-			--   enable = true,
-			--   keymaps = {
-			--     init_selection = "<C-space>",
-			--     node_incremental = "<C-space>",
-			--     scope_incremental = false,
-			--     node_decremental = "<bs>",
-			--   },
-			-- },
+			-- <S-h> (shift+h = H): init/grow ; <S-l> (shift+l = L): shrink
+			-- Replaces the H/L defaults (top/bottom of screen), seen as less useful here
+			incremental_selection = {
+				enable = true,
+				keymaps = {
+					init_selection = "<S-h>",
+					node_incremental = "<S-h>",
+					scope_incremental = false,
+					node_decremental = "<S-l>",
+				},
+			},
 		})
 	end,
 }

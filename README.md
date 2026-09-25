@@ -3,6 +3,7 @@
 My workflow installation.
 
 It contains :
+  - kitty config
   - zsh config
   - vim config
   - nvim config

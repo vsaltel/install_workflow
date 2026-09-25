@@ -31,25 +31,35 @@ bgrey="%K{237}"
 autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git svn
 # This line obtains information from the vcs.
-zstyle ':vcs_info:git*' formats "%b"
-precmd() {
-    vcs_info
-}
+zstyle ':vcs_info:git*' formats "%b%c%u"
+zstyle ':vcs_info:git*' actionformats "%b %a%c%u"
 # Enable substitution in the prompt.
 setopt prompt_subst
 
 # Set ret value
-ret_value () {
+RET_VALUE=0
+precmd() {
     RET_VALUE="$?"
+    vcs_info
+}
+
+# Ahead/behind counts for the current branch (empty if up to date)
+git_ab() {
+    local st a=0 b=0
+    st=$(LC_ALL=C git status -sb 2>/dev/null | head -n1)
+    [[ $st == *'['*']'* ]] || return 0
+    st=${st#*\[}; st=${st%]*}
+    [[ $st == *ahead* ]] && { a=${st##*ahead\ }; a=${a%%[ ,]*}; }
+    [[ $st == *behind* ]] && { b=${st##*behind\ }; b=${b%%[ ,]*}; }
+    (( a > 0 || b > 0 )) && print -nr "↑${a}↓${b} "
+    return 0
 }
 
 # Set prompt
 prompt () {
     PROMPT=""
-    #Ret value
-    if [ "${RET_VALUE}" -eq 0 ];then
-        PROMPT+="${bgreen}${fblack}${sbold}0${rbold} ${rsa}${borange}${fgreen}${rsa}"
-    else
+    #Ret value (only shown on error)
+    if [ "${RET_VALUE}" -ne 0 ]; then
         PROMPT+="${bred}${fblack}${sbold}${RET_VALUE}${rbold} ${rsa}${borange}${fred}${rsa}"
     fi
     #Directory
@@ -59,9 +69,8 @@ prompt () {
 	# Right Prompt
 	RPROMPT=""
     #Git branch
-    setopt PROMPT_SUBST
     if [ "${vcs_info_msg_0_}" ]; then
-		RPROMPT+="${fgrey}${rsf}${bgrey}${forange}${sbold} ${vcs_info_msg_0_} ${rbold}${rsa}"
+		RPROMPT+="${fgrey}${rsf}${bgrey}${forange}${sbold} ${vcs_info_msg_0_} $(git_ab) ${rbold}${rsa}"
 		RPROMPT+="${bgrey}${forange}${rsa}"
     else
 		RPROMPT+="${forange}${rsf}"
@@ -70,25 +79,51 @@ prompt () {
 }
 
 # Init prompt
-precmd_functions+=(ret_value)
 precmd_functions+=(prompt)
 
 # Remove right useless space
 ZLE_RPROMPT_INDENT=0
 
+# Continuation prompt
+PS2="${fgrey}└ ${rsf} "
+
 # History parameters:
-HISTSIZE=10000
-SAVEHIST=10000
+HISTSIZE=50000
+SAVEHIST=50000
 HISTFILE=${HOME}/.zsh_history
-setopt inc_append_history_time
+setopt EXTENDED_HISTORY
+setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_SPACE
+setopt NO_BEEP
+# Avoid ctrl+s freezing the terminal
+unsetopt flow_control
+
+# Word movement: stop at / . -
+WORDCHARS='*?_=[]{}~+-'
+
+# Directory stack: every cd pushes, d to list, cd -N to jump back
+setopt AUTO_PUSHD PUSHD_IGNORE_DUPS PUSHD_SILENT
+alias d='dirs -v'
 
 # Basic auto/tab complete:
 autoload -U compinit
-zstyle ':completion:*' menu select
-zstyle ':completion:*' completer _expand_alias _complete _ignored
 zmodload zsh/complist
-compinit
+if [[ -n ${ZSH_COMP_DAY:-} && ${ZSH_COMP_DAY} -eq $(date +%Y%m%d) ]]; then
+    :
+else
+    mkdir -p ${HOME}/.cache/zsh
+    compinit -d ${HOME}/.cache/zsh/zcompdump
+    ZSH_COMP_DAY=$(date +%Y%m%d)
+fi
+zstyle ':completion:*' menu select
+zstyle ':completion:*' completer _expand_alias _complete _approximate
+zstyle ':completion:*' approx 2
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' use-cache yes
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%F{yellow}-- %d --%f'
+zstyle ':completion:*:warnings' format '%F{red}-- No matches --%f'
 _comp_options+=(globdots)
 
 # vi mode
@@ -110,6 +145,9 @@ bindkey -M menuselect 'j' vi-down-line-or-history
 bindkey "^[[1;5C" forward-word
 bindkey "^[[1;5D" backward-word
 
+# Shift+tab: reverse menu complete
+bindkey '^[[Z' reverse-menu-complete
+
 # Use lf to switch directories and bind it to ctrl-o
 lfcd () {
     tmp="$(mktemp)"
@@ -128,11 +166,26 @@ autoload edit-command-line; zle -N edit-command-line
 bindkey '^e' edit-command-line
 
 # Plugins
-source ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source ${HOME}/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+[[ -f ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
+    source ${HOME}/.zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+[[ -f ${HOME}/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+    source ${HOME}/.zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+[[ -f ${HOME}/.zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh ]] && \
+    source ${HOME}/.zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+# fzf (if installed: ^F files, ^R fuzzy history, ^T cd)
+if command -v fzf >/dev/null; then
+    source <(fzf --zsh)
+    bindkey '^F' fzf-file-widget
+    bindkey '^T' fzf-cd-widget
+fi
 
 # Load aliases
 if [ -f ${HOME}/.zsh_aliases ]; then
     source ${HOME}/.zsh_aliases
 fi
 
+# Export
+export EDITOR=nvim
+export VISUAL=nvim
+export LESS='-R -F -X'
+export PAGER=less

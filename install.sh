@@ -125,8 +125,8 @@ done
 DIRPATH=$(realpath $(dirname ${0}))
 LOGFILE="${DIRPATH}/logs.txt"
 SRC_DIR="${DIRPATH}/srcs"
-CONFIG_FILES="zshrc zsh_aliases vimrc tmux.conf tmux.terminfo"
-CONFIG_DIRS="zsh vim tmux"
+CONFIG_FILES="zshrc zsh_aliases tmux.conf tmux.terminfo"
+CONFIG_DIRS="zsh tmux"
 PACKET_MANAGER="apt-get -y"
 KITTY_REQUIRED_PACKAGES="kitty"
 ZSH_REQUIRED_PACKAGES="zsh curl git gawk silversearcher-ag"
@@ -190,13 +190,9 @@ fi
 touch ${LOGFILE}
 chown ${DESTUSER}:${DESTUSER} ${LOGFILE}
 
-# Copy Mode
-if [ "${COPY_MODE}" -eq 1 ]; then
-	echo -e "${BOLD}${GREEN}COPY MODE START !${NC}"
-	if [ ! -e ${USERHOME}/.vim/plugged/ultisnips/UltiSnips/c.snippets ]; then
-		echo -e "${BOLD}${RED}NEED INSTALLATION BEFORE COPY MODE${NC}"
-		exit 4
-	fi
+	# Copy Mode
+	if [ "${COPY_MODE}" -eq 1 ]; then
+		echo -e "${BOLD}${GREEN}COPY MODE START !${NC}" | tee -a ${LOGFILE}
 	mkdir -p ${COPY_DIR}
 	echo -e "${BOLD}${GREEN}COPY DIRECTORY CREATED ! (${COPYDIR})${NC}" | tee -a ${LOGFILE}
 	for FILE in ${CONFIG_FILES}; do
@@ -257,6 +253,7 @@ if ask_install "zsh" ; then
 		mkdir -p ${USERHOME}/.zsh/plugins
 		git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git ${USERHOME}/.zsh/plugins/zsh-syntax-highlighting 2>> ${LOGFILE}
 		git clone -q https://github.com/zsh-users/zsh-autosuggestions ${USERHOME}/.zsh/plugins/zsh-autosuggestions 2>> ${LOGFILE}
+		git clone -q https://github.com/zsh-users/zsh-history-substring-search.git ${USERHOME}/.zsh/plugins/zsh-history-substring-search 2>> ${LOGFILE}
 		chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh
 
 		# Lf install
@@ -267,6 +264,22 @@ if ask_install "zsh" ; then
 			chown ${DESTUSER}:${DESTUSER} ${USERHOME}/.zsh/plugins/lf/lf.tar
 			tar -xvf ${USERHOME}/.zsh/plugins/lf/lf.tar -C /usr/local/bin >> ${LOGFILE}
 			chmod 755 /usr/local/bin/lf &>> ${LOGFILE}
+		fi
+
+		# Fzf install (latest from GitHub: apt fzf is too old, lacks --zsh shell integration)
+		echo -e "${BOLD}${YELLOW}INSTALL FZF${NC}" | tee -a ${LOGFILE}
+		FZF_VERSION=$(curl -s "https://api.github.com/repos/junegunn/fzf/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+		case $(uname -m) in
+			aarch64) FZF_ARCH=arm64 ;;
+			*)       FZF_ARCH=amd64 ;;
+		esac
+		curl -Lo "${DIRPATH}/fzf.tgz" "https://github.com/junegunn/fzf/releases/download/v${FZF_VERSION}/fzf-${FZF_VERSION}-linux_${FZF_ARCH}.tar.gz" &>> ${LOGFILE}
+		if [ -e "${DIRPATH}/fzf.tgz" ]; then
+			tar xzf "${DIRPATH}/fzf.tgz" -C ${DIRPATH} "fzf"
+			install "${DIRPATH}/fzf" /usr/local/bin
+			rm "${DIRPATH}/fzf.tgz" "${DIRPATH}/fzf"
+		else
+			echo -e "${BOLD}${RED}FZF INSTALL FAILED${NC}" | tee -a ${LOGFILE}
 		fi
 	fi
 
@@ -318,6 +331,11 @@ if ask_install "tmux"; then
 		ln -s ${SRC_DIR}/tmux.conf ${USERHOME}/.tmux.conf
 		ln -s ${SRC_DIR}/tmux.terminfo ${USERHOME}/.tmux/tmux.terminfo
 		chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.tmux.conf
+
+		# Compile custom terminfo (required for TERM=tmux-256color)
+		mkdir -p ${USERHOME}/.terminfo
+		tic -x -o ${USERHOME}/.terminfo ${USERHOME}/.tmux/tmux.terminfo &>> ${LOGFILE}
+		chown -R ${DESTUSER}:${DESTUSER} ${USERHOME}/.terminfo
 
 		# Install tpm for tmux plugins
 		echo -e "${BOLD}${YELLOW}INSTALL TMUX PLUGIN MANAGER${NC}" | tee -a ${LOGFILE}

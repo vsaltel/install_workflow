@@ -1,20 +1,48 @@
 ## Aliases      ##
 
+# Git helpers (used by g* aliases)
+git_current_branch() { git rev-parse --abbrev-ref HEAD; }
+git_main_branch() {
+    local ref
+    ref=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null)
+    if [ -n "$ref" ]; then
+        echo "${ref#origin/}"
+        return
+    fi
+    for b in main master; do
+        if git show-ref --verify --quiet "refs/heads/$b"; then
+            echo "$b"
+            return
+        fi
+    done
+    echo main
+}
+git_develop_branch() {
+    git branch -r --list 'origin/develop' --format='%(refname:short)' | sed 's@^origin/@@'
+}
+
+# Clipboard copy
+alias -g yy="| wl-copy"
+
 # SSH
 alias ssh="TERM=xterm-256color ssh"
 alias sshpass="TERM=xterm-256color sshpass"
+
+# Opencode + greywall
+alias opencode='greywall -- opencode'
 
 # Color
 alias ls="ls --color=auto"
 alias grep="grep --color"
 
 # Ls
-alias l="ls -lakvNF --group-directories-first -I '..' -I '.'"
+alias ll="ls -lakvNF --group-directories-first -I '..' -I '.'"
 
 # Find
-alias agg="ag -g"
+alias f="find -name"
 alias fn="find -type f -name"
 alias fd="find -type d -name"
+alias fi="find -iname"
 alias fni="find -type f -iname"
 alias fdi="find -type d -iname"
 alias fp="find -path"
@@ -37,9 +65,6 @@ alias syss="systemctl status"
 
 # History
 alias histupd="fc -RI"
-
-# Uncrustify
-alias uncrust='python3 /usr/bin/git-uncrustify'
 
 alias g='git'
 alias ga="git add"
@@ -155,7 +180,7 @@ alias gstc='git stash clear'
 alias gstd='git stash drop'
 alias gstl='git stash list'
 alias gstp='git stash pop'
-alias gsts='git stash show --text'
+alias gstsh='git stash show --text'
 alias gsw='git switch'
 alias gswc='git switch --create'
 alias gswd='git switch $(git_develop_branch)'
@@ -174,3 +199,6 @@ alias gwta='git worktree add'
 alias gwtls='git worktree list'
 alias gwtmv='git worktree move'
 alias gwtrm='git worktree remove'
+
+# Local aliases (personal infra + secrets) - kept outside git
+[[ -f ${HOME}/.zsh_aliases_local ]] && source ${HOME}/.zsh_aliases_local

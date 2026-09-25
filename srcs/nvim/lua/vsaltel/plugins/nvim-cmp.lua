@@ -30,9 +30,8 @@ return {
 			},
 			mapping = cmp.mapping.preset.insert({
 				["<C-k>"] = cmp.mapping.select_prev_item(), -- previous suggestion
-				["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
-				["`"] = cmp.mapping.select_next_item(), -- next suggestion
-				["<CR>"] = cmp.mapping.confirm({ select = false }),
+			["<C-j>"] = cmp.mapping.select_next_item(), -- next suggestion
+			["<CR>"] = cmp.mapping.confirm({ select = false }),
 			}),
 			-- sources for autocompletion
 			sources = cmp.config.sources({

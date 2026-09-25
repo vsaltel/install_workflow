@@ -42,6 +42,7 @@ return {
 		'--background-index',
 		'--clang-tidy',
 		'--enable-config',
+		'--pch-storage=memory',
 		'-j', '4',
 		-- '--log=error',
 	},

@@ -14,25 +14,6 @@ return {
 		-- optionally enable 24-bit colour
 		vim.opt.termguicolors = true
 
-		-- empty setup using defaults
-		nvimtree.setup()
-
-		-- OR setup with some options
-		nvimtree.setup({
-				sort = {
-					sorter = "case_sensitive",
-				},
-				view = {
-					width = 30,
-				},
-				renderer = {
-					group_empty = true,
-				},
-				filters = {
-					dotfiles = true,
-				},
-			})
-
 		local function my_on_attach(bufnr)
 			local api = require "nvim-tree.api"
 
@@ -45,25 +26,40 @@ return {
 
 			-- custom mappings
 			vim.keymap.del('n', '<Tab>', { buffer = bufnr })
- 			vim.keymap.del('n', '<C-t>', { buffer = bufnr })
- 			vim.keymap.set('n', 't', api.node.open.tab, opts('Open: New Tab'))
+			vim.keymap.del('n', '<C-t>', { buffer = bufnr })
+			vim.keymap.set('n', 't', api.node.open.tab, opts('Open: New Tab'))
 			vim.keymap.del('n', 's', { buffer = bufnr })
- 			vim.keymap.set('n', 's',  api.node.open.vertical, opts('Open: Vertical Split'))
-  			vim.keymap.del('n', '<C-]>', { buffer = bufnr })
- 			vim.keymap.set('n', '-',  api.tree.change_root_to_node, opts('CD'))
-  			vim.keymap.set('n', '_',  api.tree.change_root_to_parent, opts('Up'))
-
+			vim.keymap.set('n', 's', api.node.open.vertical, opts('Open: Vertical Split'))
+			vim.keymap.del('n', '<C-]>', { buffer = bufnr })
+			vim.keymap.set('n', '-', api.tree.change_root_to_node, opts('CD'))
+			vim.keymap.set('n', '_', api.tree.change_root_to_parent, opts('Up'))
 		end
 
+		-- setup unique (fs_event watcher laissé actif par défaut)
 		nvimtree.setup({
-				on_attach = my_on_attach,
-			})
+			sort = {
+				sorter = "case_sensitive",
+			},
+			view = {
+				width = 30,
+			},
+			renderer = {
+				group_empty = true,
+			},
+			filters = {
+				dotfiles = true,
+				-- patterns Lua matchés sur le CHEMIN COMPLET : "/build/" exclut le composant
+				-- "build" sans toucher à un fichier "buildinfo.c" — adapte à tes répertoires
+				exclude = { "/build/", "/out/", "/obj/", "/.git" },
+			},
+			on_attach = my_on_attach,
+		})
 
 		-- set keymaps
 		local keymap = vim.keymap
 
-		keymap.set("n", "<F2>", "<cmd>NvimTreeToggle<CR>")
-		keymap.set("n", "<F3>", "<cmd>NvimTreeFindFileToggle<CR>")
+		keymap.set("n", "<F2>", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle nvim-tree" })
+		keymap.set("n", "<F3>", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Find file in nvim-tree" })
 		-- keymap.set("n", "<F4>", "<cmd>NvimTreeCollapse<CR>")
 		-- keymap.set("n", "<F5>", "<cmd>NvimTreeRefresh<CR>")
 	end

@@ -9,8 +9,6 @@ vim.diagnostic.config({
 		source = true,
 		prefix = '●',
 		spacing = 4,
-		format = format,
-		suffix = suffix,
 		virt_text_pos = 'eol',
 		hl_mode = 'combine',
 	},
